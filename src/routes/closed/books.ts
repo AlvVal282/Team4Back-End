@@ -6,7 +6,7 @@ import { IJwtRequest } from '../../core/models';
 const booksRouter : Router = express.Router();
 
 /**
- * @api {get} /title Request book by title
+ * @api {get} /books/title Request book by title
  * @apiName GetBookByTitle
  * @apiGroup Books
  * @apiDescription Retrieve all books that have a specified keyword in its Title.
