@@ -113,8 +113,6 @@ booksRouter.get('/:isbn', (request: IJwtRequest, response: Response) => {
  * @apiSuccess {number} results.ratings.rating4 The total number of 4-star ratings for this book.
  * @apiSuccess {number} results.ratings.rating5 The total number of 5-star ratings for this book.
  * @apiSuccess {Object} results.icons An object holding the urls for the images of this book.
- * 98x147
- * 50x75
  * @apiSuccess {string} results.icons.large The url whose destination matches an
  * image for this book. On average, image sizes fall within about <code>98x147</code>
  * in pixels.
