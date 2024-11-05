@@ -23,9 +23,9 @@ CREATE TABLE Account_Credential (
     FOREIGN KEY(Account_ID) REFERENCES Account(Account_ID)
 );
 
-CREATE TABLE temp (
-    id SERIAL PRIMARY KEY,
-    isbn13 BIGINT,
+CREATE TABLE Temp (
+    id INT PRIMARY KEY,
+    isbn13 BIGINT UNIQUE,
     authors TEXT,
     publication_year INT,
     original_title TEXT,
@@ -42,7 +42,7 @@ CREATE TABLE temp (
 );
 
 CREATE TABLE Books (
-    id SERIAL PRIMARY KEY,
+    id INT PRIMARY KEY,
     isbn13 BIGINT UNIQUE,
     publication_year INT,
     original_title TEXT,
@@ -71,22 +71,22 @@ CREATE TABLE Books_Authors (
     PRIMARY KEY (Author_ID, isbn13)
 );
 
-COPY temp
+COPY Temp
 FROM '/docker-entrypoint-initdb.d/books.csv'
 DELIMITER ','
 CSV HEADER;
 
-INSERT INTO Books (isbn13, publication_year, original_title, title, rating_avg, rating_count, rating_1_star, rating_2_star, rating_3_star, rating_4_star, rating_5_star, image_url, image_small_url)
-SELECT isbn13, publication_year, original_title, title, rating_avg, rating_count, rating_1_star, rating_2_star, rating_3_star, rating_4_star, rating_5_star, image_url, image_small_url
-FROM temp;
+INSERT INTO Books (id, isbn13, publication_year, original_title, title, rating_avg, rating_count, rating_1_star, rating_2_star, rating_3_star, rating_4_star, rating_5_star, image_url, image_small_url)
+SELECT id, isbn13, publication_year, original_title, title, rating_avg, rating_count, rating_1_star, rating_2_star, rating_3_star, rating_4_star, rating_5_star, image_url, image_small_url
+FROM Temp;
 
 INSERT INTO Author (Author_Name)
 SELECT DISTINCT unnest(string_to_array(authors, ','))
-FROM temp;
+FROM Temp;
 
 INSERT INTO Books_Authors (isbn13, Author_ID)
 SELECT t.isbn13, a.Author_ID
-FROM temp t
+FROM Temp t
 JOIN Author a ON a.Author_Name = ANY(string_to_array(t.authors, ','));
 
-DROP TABLE IF EXISTS temp;
+DROP TABLE IF EXISTS Temp;
