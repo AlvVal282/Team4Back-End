@@ -33,92 +33,51 @@ interface: IBook {
 */
 
 /**
- * @api {get} /books Request to retrieve all books
- * @apiName GetBooks
- * @apiGroup Books
- * @apiDescription Retrieve all books from the database.
- *
- *
- * @apiSuccess {Object[]} results An aggregate of all books.
- * @apiSuccess {number} result.isbn13 The ISBN number for the book.
- * @apiSuccess {string} result.author A comma-separated string of authors who have
- * contributed to the book.
- * @apiSuccess {number} result.publication The initial publication date of this book.
- * @apiSuccess {string} result.original_title The title of the series this book was
- * printed in. If not in a series, it is a copy of the title attribute. Note that you
- * cannot consisently rely upon <code>original_title</code> to be applied applicably to
- * serial publications.
- * @apiSuccess {string} result.title The title of the book.
- * @apiSuccess {Object} result.ratings An object representing all the information for
- * consumer and critic ratings for the given book.
- * @apiSuccess {number} result.ratings.average The mean value of all 5-star ratings for
- * this book.
- * @apiSuccess {number} result.ratings.count The total number of ratings for this book.
- * @apiSuccess {number} result.ratings.rating1 The total number of 1-star ratings for this book.
- * @apiSuccess {number} result.ratings.rating2 The total number of 2-star ratings for this book.
- * @apiSuccess {number} result.ratings.rating3 The total number of 3-star ratings for this book.
- * @apiSuccess {number} result.ratings.rating4 The total number of 4-star ratings for this book.
- * @apiSuccess {number} result.ratings.rating5 The total number of 5-star ratings for this book.
- * @apiSuccess {Object} result.icons An object holding the urls for the images of this book.
- * @apiSuccess {string} result.icons.large The url whose destination matches an
- * image for this book. On average, image sizes fall within about <code>98x147</code>
- * in pixels.
- * @apiSuccess {string} result.icons.small The url whose destination matches the
- * image for this book. On average, image sizes fall within about <code>50x75</code>
- *
- * @apiError (400: No books) {String} message "No books found"
- */
-booksRouter.get('/', (request: IJwtRequest, response: Response) => {
-    response.status(500).send({
-        message:
-            'Route not currently implemented. Please complain to developers.',
-    });
-});
-
-/**
  * @api {post} /books Request to add a book
- * @apiName PostBooks
+ * @apiName AddBook
  * @apiGroup Books
  * @apiDescription Request to add a book to the database.
  *
- * @apiBody {number} ISBN The books isbn
- * @apiBody {string} Authors The author(s) of the book
- * @apiBody {number} Publication The books publication date
- * @apiBody {string} OriginalTitle The books original title
- * @apiBody {string} Title The books title
- * @apiBody {number} Rating The books rating
- * @apiBody {string} Image The books image url
- * @apiBody {string} SmallImage The books small image url
- *
- * @apiSuccess {Object[]} results An aggregate of all books.
- * @apiSuccess {number} result.isbn13 The ISBN number for the book.
- * @apiSuccess {string} result.author A comma-separated string of authors who have
+ * @apiBody {Object} entry the book to be added
+ * as a query parameter.
+ * @apiBody {number} entry.isbn13 The ISBN number for the book. The ISBN number must
+ * be an integer of exactly 13 digits; however, leading zeroes are acceptable, in which
+ * case it may be less than 13 digits and interpreted as having leading zeroes.
+ * @apiBody {string} entry.author A comma-separated string of authors who have
  * contributed to the book.
- * @apiSuccess {number} result.publication The initial publication date of this book.
- * @apiSuccess {string} result.original_title The title of the series this book was
- * printed in. If not in a series, it is a copy of the title attribute. Note that you
- * cannot consisently rely upon <code>original_title</code> to be applied applicably to
- * serial publications.
- * @apiSuccess {string} result.title The title of the book.
- * @apiSuccess {Object} result.ratings An object representing all the information for
+ * @apiBody {number} entry.publication The initial publication year of this book. Negative
+ * years are not allowed.
+ * @apiBody {string} entry.original_title The title of the series this book was
+ * printed in. It is acceptable to have <code> original_title </code> omitted, in which
+ * case it is a copy of the <code> title </code> field.
+ * @apiBody {string} entry.title The title of the book.
+ * @apiBody {Object} entry.ratings An object representing all the information for
  * consumer and critic ratings for the given book.
- * @apiSuccess {number} result.ratings.average The mean value of all 5-star ratings for
- * this book.
- * @apiSuccess {number} result.ratings.count The total number of ratings for this book.
- * @apiSuccess {number} result.ratings.rating1 The total number of 1-star ratings for this book.
- * @apiSuccess {number} result.ratings.rating2 The total number of 2-star ratings for this book.
- * @apiSuccess {number} result.ratings.rating3 The total number of 3-star ratings for this book.
- * @apiSuccess {number} result.ratings.rating4 The total number of 4-star ratings for this book.
- * @apiSuccess {number} result.ratings.rating5 The total number of 5-star ratings for this book.
- * @apiSuccess {Object} result.icons An object holding the urls for the images of this book.
- * @apiSuccess {string} result.icons.large The url whose destination matches an
- * image for this book. On average, image sizes fall within about <code>98x147</code>
- * in pixels.
- * @apiSuccess {string} result.icons.small The url whose destination matches the
- * image for this book. On average, image sizes fall within about <code>50x75</code>
+ * @apiBody {number} entry.ratings.average The mean value of all 5-star ratings for
+ * this book. Must be within the range of 0 to 5 inclusive.
+ * @apiBody {number} entry.ratings.count The total number of ratings for this book. Must be
+ * positive.
+ * @apiBody {number} entry.ratings.rating1 The total number of 1-star ratings for this book.
+ * Must be positive.
+ * @apiBody {number} entry.ratings.rating2 The total number of 2-star ratings for this book.
+ * Must be positive.
+ * @apiBody {number} entry.ratings.rating3 The total number of 3-star ratings for this book.
+ * Must be positive.
+ * @apiBody {number} entry.ratings.rating4 The total number of 4-star ratings for this book.
+ * Must be positive.
+ * @apiBody {number} entry.ratings.rating5 The total number of 5-star ratings for this book.
+ * Must be positive.
+ * @apiBody {Object} entry.icons An object holding the urls for the images of this book.
+ * @apiBody {string} entry.icons.large The url whose destination matches an image for this book.
+ * While not a direct requirement, the dimensions of the image this link leads to should fall
+ * within about <code>98x147</code> in pixels.
+ * @apiBody {string} entry.icons.small The url whose destination matches an image for this book.
+ * While not a direct requirement, the dimensions of the image this link leads to should fall
+ * within about <code>50x75</code> in pixels.
+ *
+ * @apiSuccess (201: Succesfully added) {String} message "Book successfully added."
  *
  * @apiError (400: Book exists) {String} message "Book exists"
- * @apiError (400: Missing Parameters) {String} message "Missing required information - please refer to documentation"
  * @apiError (400: Missing Parameters) {String} message "Missing required information - please refer to documentation"
  * @apiError (400: Invalid ISBN) {String} message "Invalid or missing ISBN - please refer to documentation"
  * @apiError (400: Invalid Authors) {String} message "Invalid or missing Authors - please refer to documentation"
@@ -145,7 +104,8 @@ booksRouter.post('/', (request: IJwtRequest, response: Response) => {
  * ISBN number.
  *
  * @apiParam {number} isbn A 13-digit ISBN integer. Must be within the range of
- * <code>10^12 <= isbn < 10^13</code>
+ * <code> 0 <= isbn < 10^13</code>. While 13 digits are strictly required, values
+ * less than <code> 10^12 </code> are interpreted as having leading zeros.
  *
  * @apiSuccess {Object} result The book that matches the exact ISBN number provided 
  * as a query parameter.
@@ -195,7 +155,8 @@ booksRouter.get('/:isbn', (request: IJwtRequest, response: Response) => {
  * ISBN number.
  *
  * @apiParam {number} isbn A 13-digit ISBN integer. Must be within the range of
- * <code>10^12 <= isbn < 10^13</code>
+ * <code> 0 <= isbn < 10^13</code>. While 13 digits are strictly required, values
+ * less than <code> 10^12 </code> are interpreted as having leading zeros.
  *
  * @apiSuccess {Object} result The book that matches the exact ISBN number provided 
  * as a query parameter.
@@ -239,48 +200,55 @@ booksRouter.delete('/:isbn', (request: IJwtRequest, response: Response) => {
 
 
 /**
- * @api {get} /books/:rating Request book by rating
+ * @api {get} /books/rating Request book by rating
  * @apiName GetBookByRating
  * @apiGroup Books
- * @apiDescription Retrieve a book from the database that reach a minimum rating
- * threshold. If multiple books are returned by this query, it returns them in 
- * alphabetical order.
+ * @apiDescription Retrieve all books whose mean rating falls within the interval
+ * of two values as defined in the HTTP request body: <code> min <= book.ratings.average
+ * <= max </code>. The order of returned books are also determined by their average
+ * rating. Whether it is ordered by min-first or max-first is also determined by the body.
+ * Note that the min - or lower-bound - must be less than or equal to the max - upper-bound.
  *
- * @apiParam {float} rating A rating float. Must be within the range of
- * <code> 1 <= 5 </code>
+ * @apiBody {number} min The lower-bound of all average ratings for each book
+ * this route returns.
+ * @apiBody {number} max The upper-bound of all average ratings for each book
+ * this route returns.
+ * @apiBody {string} order The ordering of the returned books. The only two allowed
+ * strings are: <code> "min-first" </code> or <code> "max-first" </code>.
  *
- * @apiSuccess {Object[]} results An aggregate of all books that reach the minimum
- * rating.
- * @apiSuccess {number} result.isbn13 The ISBN number for the book.
- * @apiSuccess {string} result.author A comma-separated string of authors who have
+ * @apiSuccess {Object[]} results An aggregate of all books that fall within the
+ * average rating interval.
+ * @apiSuccess {number} results.isbn13 The ISBN number for the book.
+ * @apiSuccess {string} results.author A comma-separated string of authors who have
  * contributed to the book.
- * @apiSuccess {number} result.publication The initial publication date of this book.
- * @apiSuccess {string} result.original_title The title of the series this book was
+ * @apiSuccess {number} results.publication The initial publication date of this book.
+ * @apiSuccess {string} results.original_title The title of the series this book was
  * printed in. If not in a series, it is a copy of the title attribute. Note that you
  * cannot consisently rely upon <code>original_title</code> to be applied applicably to
  * serial publications.
- * @apiSuccess {string} result.title The title of the book.
- * @apiSuccess {Object} result.ratings An object representing all the information for
+ * @apiSuccess {string} results.title The title of the book.
+ * @apiSuccess {Object} results.ratings An object representing all the information for
  * consumer and critic ratings for the given book.
- * @apiSuccess {number} result.ratings.average The mean value of all 5-star ratings for
+ * @apiSuccess {number} results.ratings.average The mean value of all 5-star ratings for
  * this book.
- * @apiSuccess {number} result.ratings.count The total number of ratings for this book.
- * @apiSuccess {number} result.ratings.rating1 The total number of 1-star ratings for this book.
- * @apiSuccess {number} result.ratings.rating2 The total number of 2-star ratings for this book.
- * @apiSuccess {number} result.ratings.rating3 The total number of 3-star ratings for this book.
- * @apiSuccess {number} result.ratings.rating4 The total number of 4-star ratings for this book.
- * @apiSuccess {number} result.ratings.rating5 The total number of 5-star ratings for this book.
- * @apiSuccess {Object} result.icons An object holding the urls for the images of this book.
- * @apiSuccess {string} result.icons.large The url whose destination matches an
+ * @apiSuccess {number} results.ratings.count The total number of ratings for this book.
+ * @apiSuccess {number} results.ratings.rating1 The total number of 1-star ratings for this book.
+ * @apiSuccess {number} results.ratings.rating2 The total number of 2-star ratings for this book.
+ * @apiSuccess {number} results.ratings.rating3 The total number of 3-star ratings for this book.
+ * @apiSuccess {number} results.ratings.rating4 The total number of 4-star ratings for this book.
+ * @apiSuccess {number} results.ratings.rating5 The total number of 5-star ratings for this book.
+ * @apiSuccess {Object} results.icons An object holding the urls for the images of this book.
+ * @apiSuccess {string} results.icons.large The url whose destination matches an
  * image for this book. On average, image sizes fall within about <code>98x147</code>
  * in pixels.
- * @apiSuccess {string} result.icons.small The url whose destination matches the
+ * @apiSuccess {string} results.icons.small The url whose destination matches the
  * image for this book. On average, image sizes fall within about <code>50x75</code>
  *
- * @apiError (404: No book with given ISBN) {String} message "No book with given ISBN"
- * @apiError (400: Query parameter wrong type) {String} message "Query parameter not of required type - please refer to documentation"
- * @apiError (400: Rating not in range) {String} message "Rating not in range - please refer to documentation"
- * @apiError (400: Empty query parameter) {String} message "No query parameter in url"
+ * @apiError (404: No books with given average rating interval.) {String} message "No books fall within the interval requested"
+ * @apiError (400: Lower-bound greater than upper-bound) {String} message "The lower bound for the interval is greater than the upper bound - please refer to documentation"
+ * @apiError (400: Missing lower-bound) {String} message "Missing lower-bound parameter - please refer to documentation"
+ * @apiError (400: Missing upper-bound) {String} message "Missing upper-bound parameter - please refer to documentation"
+ * @apiError (400: Missing ordering field in body) {String} message "Missing ordering field in http body - please refer to documentation"
  */
 booksRouter.get('/:rating', (request: IJwtRequest, response: Response) => {
     response.status(500).send({
@@ -497,12 +465,14 @@ booksRouter.get('/author/:name', (request: IJwtRequest, response: Response) => {
 });
 
 /**
- * @api {delete} /books/:author Delete books by author
+ * @api {delete} /books/author/:name Delete books by author
  * @apiName DeleteBooksByAuthor
  * @apiGroup Books
- * @apiDescription Delete all books that were written by a specified author.
+ * @apiDescription Delete all books that a specified author contributed to.
  *
- * @apiParam {string} author A author to query all books.
+ * @apiParam {string} name An author's name to query the database. The database is
+ * queried exactly in the form of <code> Firstname Lastname </code>. While not case-sensitive,
+ * only exact matches for first and last are deleted.
  *
  * @apiSuccess {Object[]} results An aggregate of all books that match the query.
  * @apiSuccess {number} results.isbn13 The ISBN number for the book.
@@ -534,7 +504,7 @@ booksRouter.get('/author/:name', (request: IJwtRequest, response: Response) => {
  * @apiError (404: No book with given title) {String} message "No book with given author"
  * @apiError (400: Empty query parameter) {String} message "No query parameter in url"
  */
-booksRouter.delete('/:author', (request: IJwtRequest, response: Response) => {
+booksRouter.delete('/author/:name', (request: IJwtRequest, response: Response) => {
     response.status(500).send({
         message:
             'Route not currently implemented. Please complain to developers.',
