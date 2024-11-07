@@ -140,7 +140,7 @@ booksRouter.post('/', (request: IJwtRequest, response: Response) => {
  * @apiError (400: ISBN not in range) {String} message "ISBN not in range - please refer to documentation"
  * @apiError (400: Empty query parameter) {String} message "No query parameter in url"
  */
-booksRouter.get('/:isbn', (request: IJwtRequest, response: Response) => {
+booksRouter.get('/isbns/:isbn', (request: IJwtRequest, response: Response) => {
     const theQuery = 'SELECT * FROM Books WHERE isbn13 = $1';
     const values = [request.params.isbn];
 
@@ -152,13 +152,13 @@ booksRouter.get('/:isbn', (request: IJwtRequest, response: Response) => {
                 });
             } else {
                 response.status(404).send({
-                    message: 'Name not found',
+                    message: 'isbn not found',
                 });
             }
         })
         .catch((error) => {
             //log the error
-            console.error('DB Query error on GET /:isbn');
+            console.error('DB Query error on GET /isbns/:isbn');
             console.error(error);
             response.status(500).send({
                 message: 'server error - contact support',
@@ -268,12 +268,34 @@ booksRouter.delete('/:isbn', (request: IJwtRequest, response: Response) => {
  * @apiError (400: Missing upper-bound) {String} message "Missing upper-bound parameter - please refer to documentation"
  * @apiError (400: Missing ordering field in body) {String} message "Missing ordering field in http body - please refer to documentation"
  */
-booksRouter.get('/:rating', (request: IJwtRequest, response: Response) => {
-    response.status(500).send({
-        message:
-            'Route not currently implemented. Please complain to developers.',
-    });
-});
+booksRouter.get(
+    '/ratings/:rating',
+    (request: IJwtRequest, response: Response) => {
+        const theQuery = 'SELECT * FROM Books WHERE rating_avg >= $1';
+        const values = [request.params.rating];
+
+        pool.query(theQuery, values)
+            .then((result) => {
+                if (result.rowCount >= 1) {
+                    response.send({
+                        entry: result.rows,
+                    });
+                } else {
+                    response.status(404).send({
+                        message: 'Rating not found',
+                    });
+                }
+            })
+            .catch((error) => {
+                //log the error
+                console.error('DB Query error on GET /ratings/:rating');
+                console.error(error);
+                response.status(500).send({
+                    message: 'server error - contact support',
+                });
+            });
+    }
+);
 
 /**
  * @api {put} /books/rating/:isbn/ Update book ratings
@@ -381,10 +403,29 @@ booksRouter.put('/rating/:isbn', (request: IJwtRequest, response: Response) => {
  * @apiError (400: Empty query parameter) {String} message "No query parameter in url"
  */
 booksRouter.get('/title/:name', (request: IJwtRequest, response: Response) => {
-    response.status(500).send({
-        message:
-            'Route not currently implemented. Please complain to developers.',
-    });
+    const theQuery = 'SELECT * FROM Books WHERE title = $1';
+    const values = [request.params.name];
+
+    pool.query(theQuery, values)
+        .then((result) => {
+            if (result.rowCount >= 1) {
+                response.send({
+                    entry: result.rows,
+                });
+            } else {
+                response.status(404).send({
+                    message: 'Title not found',
+                });
+            }
+        })
+        .catch((error) => {
+            //log the error
+            console.error('DB Query error on GET /title/:name');
+            console.error(error);
+            response.status(500).send({
+                message: 'server error - contact support',
+            });
+        });
 });
 
 /**
@@ -478,10 +519,36 @@ booksRouter.delete(
  * @apiError (400: Empty query parameter) {String} message "No query parameter in url"
  */
 booksRouter.get('/author/:name', (request: IJwtRequest, response: Response) => {
-    response.status(500).send({
-        message:
-            'Route not currently implemented. Please complain to developers.',
-    });
+    const theQuery = `
+        SELECT b.isbn13, b.title, b.original_title, b.publication_year, 
+               b.rating_avg, b.rating_count, b.image_url 
+        FROM Books b 
+        JOIN Books_Authors ba ON b.isbn13 = ba.isbn13 
+        JOIN Author a ON ba.Author_ID = a.Author_ID 
+        WHERE a.Author_Name = $1;
+    `;
+    const values = [request.params.name];
+
+    pool.query(theQuery, values)
+        .then((result) => {
+            if (result.rowCount >= 1) {
+                response.send({
+                    entry: result.rows,
+                });
+            } else {
+                response.status(404).send({
+                    message: 'Author not found',
+                });
+            }
+        })
+        .catch((error) => {
+            //log the error
+            console.error('DB Query error on GET /author/:name');
+            console.error(error);
+            response.status(500).send({
+                message: 'server error - contact support',
+            });
+        });
 });
 
 /**
