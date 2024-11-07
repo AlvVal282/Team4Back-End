@@ -24,19 +24,16 @@ export interface IUserRequest extends Request {
     id: number;
 }
 
-// Add more/your own password validation here. The *rules* must be documented
-// and the client-side validation should match these rules.
-const passRegex = /^[a-zA-Z0-9!@#\$%\^&\*]{8,20}$/;
+const passRegex = /^[a-zA-Z0-9!@#$%^&*]{8,20}$/;
 const isValidPassword = (password: string): boolean =>
-    //isStringProvided(password) && password.length > 7;
-    isStringProvided(password) && passRegex.exec(password);
+    isStringProvided(password) && passRegex.exec(password) !== null;
 
 // Add more/your own phone number validation here. The *rules* must be documented
 // and the client-side validation should match these rules.
 const phoneRegex = /^\([0-9]{3}\) [0-9]{3}-[0-9]{4}$/;
 const isValidPhone = (phone: string): boolean =>
     //isStringProvided(phone) && phone.length >= 10;
-    isStringProvided(phone) && phoneRegex.exec(phone);
+    isStringProvided(phone) && phoneRegex.exec(phone) !== null;
 
 // Add more/your own role validation here. The *rules* must be documented
 // and the client-side validation should match these rules.
@@ -47,10 +44,10 @@ const isValidRole = (priority: string): boolean =>
 
 // Add more/your own email validation here. The *rules* must be documented
 // and the client-side validation should match these rules.
-const emailRegex = /^[a-zA-Z0-9_\.\-]+@[a-ZA-Z0-9\-!\$&_,~:!]\.(com|net|edu|dev|gov|org)$/;
+const emailRegex = /^[a-zA-Z0-9_.\-]+@[a-zA-Z0-9\-$&_,~:!]\.(com|net|edu|dev|gov|org)$/;
 const isValidEmail = (email: string): boolean =>
     //isStringProvided(email) && email.includes('@');
-    isStringProvided(email) && emailRegex.exec(email);
+    isStringProvided(email) && emailRegex.exec(email) !== null;
 
 // middleware functions may be defined elsewhere!
 const emailMiddlewareCheck = (
@@ -70,7 +67,10 @@ const emailMiddlewareCheck = (
 /**
  * @api {post} /register Request to register a user
  *
- * @apiDescription Document this route. !**Document the password rules here**!
+ * @apiDescription Send a request to the API to register a new account.
+ *
+ * <em>Email rules</em>: Emails must follow the format of <code> \<name\>@\<domain\>.\<com|net|edu|dev|gov|org\> </code>
+ *
  * !**Document the role rules here**!
  *
  * @apiName PostRegister
