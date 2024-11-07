@@ -1,9 +1,10 @@
 // express is the framework we're going to use to handle requests
 import express, { Request, Response, Router } from 'express';
 import { IJwtRequest } from '../../core/models';
+import { pool } from '../../core/utilities';
 
 // retrieve the router object from express
-const booksRouter : Router = express.Router();
+const booksRouter: Router = express.Router();
 
 /*
 interface: IRatings {
@@ -95,7 +96,6 @@ booksRouter.post('/', (request: IJwtRequest, response: Response) => {
     });
 });
 
-
 /**
  * @api {get} /books/:isbn Request book by ISBN
  * @apiName GetBookByISBN
@@ -107,7 +107,7 @@ booksRouter.post('/', (request: IJwtRequest, response: Response) => {
  * <code> 0 <= isbn < 10^13</code>. While 13 digits are strictly required, values
  * less than <code> 10^12 </code> are interpreted as having leading zeros.
  *
- * @apiSuccess {Object} result The book that matches the exact ISBN number provided 
+ * @apiSuccess {Object} result The book that matches the exact ISBN number provided
  * as a query parameter.
  * @apiSuccess {number} result.isbn13 The ISBN number for the book.
  * @apiSuccess {string} result.author A comma-separated string of authors who have
@@ -141,10 +141,29 @@ booksRouter.post('/', (request: IJwtRequest, response: Response) => {
  * @apiError (400: Empty query parameter) {String} message "No query parameter in url"
  */
 booksRouter.get('/:isbn', (request: IJwtRequest, response: Response) => {
-    response.status(500).send({
-        message:
-            'Route not currently implemented. Please complain to developers.',
-    });
+    const theQuery = 'SELECT * FROM Books WHERE isbn13 = $1';
+    const values = [request.params.isbn];
+
+    pool.query(theQuery, values)
+        .then((result) => {
+            if (result.rowCount == 1) {
+                response.send({
+                    entry: result.rows[0],
+                });
+            } else {
+                response.status(404).send({
+                    message: 'Name not found',
+                });
+            }
+        })
+        .catch((error) => {
+            //log the error
+            console.error('DB Query error on GET /:isbn');
+            console.error(error);
+            response.status(500).send({
+                message: 'server error - contact support',
+            });
+        });
 });
 
 /**
@@ -158,7 +177,7 @@ booksRouter.get('/:isbn', (request: IJwtRequest, response: Response) => {
  * <code> 0 <= isbn < 10^13</code>. While 13 digits are strictly required, values
  * less than <code> 10^12 </code> are interpreted as having leading zeros.
  *
- * @apiSuccess {Object} result The book that matches the exact ISBN number provided 
+ * @apiSuccess {Object} result The book that matches the exact ISBN number provided
  * as a query parameter.
  * @apiSuccess {number} result.isbn13 The ISBN number for the book.
  * @apiSuccess {string} result.author A comma-separated string of authors who have
@@ -197,7 +216,6 @@ booksRouter.delete('/:isbn', (request: IJwtRequest, response: Response) => {
             'Route not currently implemented. Please complain to developers.',
     });
 });
-
 
 /**
  * @api {get} /books/rating Request book by rating
@@ -408,13 +426,15 @@ booksRouter.get('/title/:name', (request: IJwtRequest, response: Response) => {
  * @apiError (404: No book with given title) {String} message "No book with given title"
  * @apiError (400: Empty query parameter) {String} message "No query parameter in url"
  */
-booksRouter.delete('/title/:name', (request: IJwtRequest, response: Response) => {
-    response.status(500).send({
-        message:
-            'Route not currently implemented. Please complain to developers.',
-    });
-});
-
+booksRouter.delete(
+    '/title/:name',
+    (request: IJwtRequest, response: Response) => {
+        response.status(500).send({
+            message:
+                'Route not currently implemented. Please complain to developers.',
+        });
+    }
+);
 
 /**
  * @api {get} /books/author/:name Request books by author
@@ -504,14 +524,14 @@ booksRouter.get('/author/:name', (request: IJwtRequest, response: Response) => {
  * @apiError (404: No book with given title) {String} message "No book with given author"
  * @apiError (400: Empty query parameter) {String} message "No query parameter in url"
  */
-booksRouter.delete('/author/:name', (request: IJwtRequest, response: Response) => {
-    response.status(500).send({
-        message:
-            'Route not currently implemented. Please complain to developers.',
-    });
-});
-
-
-
+booksRouter.delete(
+    '/author/:name',
+    (request: IJwtRequest, response: Response) => {
+        response.status(500).send({
+            message:
+                'Route not currently implemented. Please complain to developers.',
+        });
+    }
+);
 
 export { booksRouter };
