@@ -23,9 +23,9 @@ CREATE TABLE Account_Credential (
     FOREIGN KEY(Account_ID) REFERENCES Account(Account_ID)
 );
 
-CREATE TABLE Temp (
-    id INT PRIMARY KEY,
-    isbn13 BIGINT UNIQUE,
+CREATE TABLE temp (
+    id SERIAL PRIMARY KEY,
+    isbn13 BIGINT,
     authors TEXT,
     publication_year INT,
     original_title TEXT,
@@ -42,7 +42,7 @@ CREATE TABLE Temp (
 );
 
 CREATE TABLE Books (
-    id INT PRIMARY KEY,
+    id SERIAL PRIMARY KEY,
     isbn13 BIGINT UNIQUE,
     publication_year INT,
     original_title TEXT,
@@ -66,27 +66,31 @@ CREATE TABLE Author (
 CREATE TABLE Books_Authors (
     isbn13 BIGINT NOT NULL,
     Author_ID INT NOT NULL,
-    FOREIGN KEY (isbn13) REFERENCES Books(isbn13),
-    FOREIGN KEY (Author_ID) REFERENCES Author(Author_ID),
+    FOREIGN KEY (isbn13) 
+        REFERENCES Books(isbn13)
+        ON DELETE CASCADE,
+    FOREIGN KEY (Author_ID) 
+        REFERENCES Author(Author_ID)
+        ON DELETE CASCADE,
     PRIMARY KEY (Author_ID, isbn13)
 );
 
-COPY Temp
+COPY temp
 FROM '/docker-entrypoint-initdb.d/books.csv'
 DELIMITER ','
 CSV HEADER;
 
-INSERT INTO Books (id, isbn13, publication_year, original_title, title, rating_avg, rating_count, rating_1_star, rating_2_star, rating_3_star, rating_4_star, rating_5_star, image_url, image_small_url)
-SELECT id, isbn13, publication_year, original_title, title, rating_avg, rating_count, rating_1_star, rating_2_star, rating_3_star, rating_4_star, rating_5_star, image_url, image_small_url
-FROM Temp;
+INSERT INTO Books (isbn13, publication_year, original_title, title, rating_avg, rating_count, rating_1_star, rating_2_star, rating_3_star, rating_4_star, rating_5_star, image_url, image_small_url)
+SELECT isbn13, publication_year, original_title, title, rating_avg, rating_count, rating_1_star, rating_2_star, rating_3_star, rating_4_star, rating_5_star, image_url, image_small_url
+FROM temp;
 
 INSERT INTO Author (Author_Name)
 SELECT DISTINCT unnest(string_to_array(authors, ','))
-FROM Temp;
+FROM temp;
 
 INSERT INTO Books_Authors (isbn13, Author_ID)
 SELECT t.isbn13, a.Author_ID
-FROM Temp t
+FROM temp t
 JOIN Author a ON a.Author_Name = ANY(string_to_array(t.authors, ','));
 
-DROP TABLE IF EXISTS Temp;
+DROP TABLE IF EXISTS temp;
