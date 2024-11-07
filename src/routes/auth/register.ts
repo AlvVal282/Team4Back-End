@@ -26,13 +26,17 @@ export interface IUserRequest extends Request {
 
 // Add more/your own password validation here. The *rules* must be documented
 // and the client-side validation should match these rules.
+const passRegex = /^[a-zA-Z0-9!@#\$%\^&\*]{8,20}$/;
 const isValidPassword = (password: string): boolean =>
-    isStringProvided(password) && password.length > 7;
+    //isStringProvided(password) && password.length > 7;
+    isStringProvided(password) && passRegex.exec(password);
 
 // Add more/your own phone number validation here. The *rules* must be documented
 // and the client-side validation should match these rules.
+const phoneRegex = /^\([0-9]{3}\) [0-9]{3}-[0-9]{4}$/;
 const isValidPhone = (phone: string): boolean =>
-    isStringProvided(phone) && phone.length >= 10;
+    //isStringProvided(phone) && phone.length >= 10;
+    isStringProvided(phone) && phoneRegex.exec(phone);
 
 // Add more/your own role validation here. The *rules* must be documented
 // and the client-side validation should match these rules.
@@ -43,8 +47,10 @@ const isValidRole = (priority: string): boolean =>
 
 // Add more/your own email validation here. The *rules* must be documented
 // and the client-side validation should match these rules.
+const emailRegex = /^[a-zA-Z0-9_\.\-]+@[a-ZA-Z0-9\-!\$&_,~:!]\.(com|net|edu|dev|gov|org)$/;
 const isValidEmail = (email: string): boolean =>
-    isStringProvided(email) && email.includes('@');
+    //isStringProvided(email) && email.includes('@');
+    isStringProvided(email) && emailRegex.exec(email);
 
 // middleware functions may be defined elsewhere!
 const emailMiddlewareCheck = (
@@ -56,8 +62,7 @@ const emailMiddlewareCheck = (
         next();
     } else {
         response.status(400).send({
-            message:
-                'Invalid or missing email  - please refer to documentation',
+            message: 'Invalid or missing email - please refer to documentation',
         });
     }
 };
@@ -112,13 +117,11 @@ registerRouter.post(
     (request: Request, response: Response, next: NextFunction) => {
         if (isValidPhone(request.body.phone)) {
             next();
-            return;
         } else {
             response.status(400).send({
                 message:
                     'Invalid or missing phone number  - please refer to documentation',
             });
-            return;
         }
     },
     (request: Request, response: Response, next: NextFunction) => {
@@ -152,7 +155,7 @@ registerRouter.post(
             request.body.phone,
             request.body.role,
         ];
-        console.dir({ ...request.body, password: '******' });
+        // console.dir({ ...request.body, password: '******' });
         pool.query(theQuery, values)
             .then((result) => {
                 //stash the account_id into the request object to be used in the next function
@@ -203,6 +206,7 @@ registerRouter.post(
                         expiresIn: '14 days', // expires in 14 days
                     }
                 );
+                console.dir({ ...request.body, password: '******' });
                 //We successfully added the user!
                 response.status(201).send({
                     accessToken,
