@@ -24,7 +24,7 @@ export interface IUserRequest extends Request {
     id: number;
 }
 
-const passRegex = /^[a-zA-Z0-9!@#$%^&*]{8,20}$/;
+const passRegex = /^[a-zA-Z][a-zA-Z0-9!@#$%^&*]{7,19}$/;
 const isValidPassword = (password: string): boolean =>
     isStringProvided(password) && passRegex.exec(password) !== null;
 
@@ -70,9 +70,9 @@ const emailMiddlewareCheck = (
  * <code>dev</code>, <code>gov</code>, and <code>org</code>. Emails between accounts must be unique to that account. Note that missing parameters
  * will return a <code>400: Error</code> only for individual missing fields at a time.
  *
- * <strong>Password rules</strong>: Passwords must be have a string length between 8 and 20 characters, inclusive. All passwords
- * must start with one letter, followed by any number of letters and special characters. When using your password to login,
- * capitalization matters.
+ * <strong>Password rules</strong>: Passwords must be have a string length between 8 and 20 characters, inclusive. All passwords must start with
+ * one letter, followed by between 7 and 19 letters, numbers, and/or special characters in the set of: <code>!, @, #, $, %, ^, &, *</code>. When
+ * using your password to login, capitalization matters.
  *
  * <strong>Phone Rules</strong>: When passing a phone number string, it must follow the format: <code>(###) ###-####</code> where <code>#</code>
  * is any number between <code>0-9</code>.
