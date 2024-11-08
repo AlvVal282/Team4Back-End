@@ -199,7 +199,7 @@ booksRouter.post(
 );
 
 /**
- * @api {get} /books/:isbn Request book by ISBN
+ * @api {get} /books/isbns/:isbn Request book by ISBN
  * @apiName GetBookByISBN
  * @apiGroup Books
  * @apiDescription Retrieve a book from the database that matches an exact 13-digit
@@ -269,7 +269,7 @@ booksRouter.get('/isbns/:isbn', (request: IJwtRequest, response: Response) => {
 });
 
 /**
- * @api {delete} /books/:isbn Delete book by ISBN
+ * @api {delete} /books/isbns/:isbn Delete book by ISBN
  * @apiName DeleteBookByISBN
  * @apiGroup Books
  * @apiDescription Delete a book from the database that matches an exact 13-digit
