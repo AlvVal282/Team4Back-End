@@ -32,10 +32,10 @@ const key = {
  * @apiName PostLogin
  * @apiGroup Auth
  *
- * @apiBody {String} email a users email
- * @apiBody {String} password a users password
+ * @apiBody {string} email a users email
+ * @apiBody {string} password a users password
  *
- * @apiSuccess {String} accessToken JSON Web Token
+ * @apiSuccess {string} accessToken JSON Web Token
  * @apiSuccess {Object} user a user object
  * @apiSuccess {string} user.name the first name associated with <code>email</code>
  * @apiSuccess {string} user.message The message associated with <code>email</code>

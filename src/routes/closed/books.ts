@@ -244,7 +244,7 @@ booksRouter.delete('/:isbn', (request: IJwtRequest, response: Response) => {
  * @apiSuccess {string} results.icons.small The url whose destination matches the
  * image for this book. On average, image sizes fall within about <code>50x75</code>
  *
- * @apiError (404: No books with given average rating interval.) {String} message "No books fall within the interval requested"
+ * @apiError (404: No books with given average rating interval) {String} message "No books fall within the interval requested"
  * @apiError (400: Lower-bound greater than upper-bound) {String} message "The lower bound for the interval is greater than the upper bound - please refer to documentation"
  * @apiError (400: Missing lower-bound) {String} message "Missing lower-bound parameter - please refer to documentation"
  * @apiError (400: Missing upper-bound) {String} message "Missing upper-bound parameter - please refer to documentation"
