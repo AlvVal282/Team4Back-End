@@ -1,7 +1,7 @@
 // express is the framework we're going to use to handle requests
-import express, { Request, Response, Router } from 'express';
+import express, { NextFunction, Request, Response, Router } from 'express';
 import { IJwtRequest } from '../../core/models';
-import { pool } from '../../core/utilities';
+import { pool, validationFunctions } from '../../core/utilities';
 
 // retrieve the router object from express
 const booksRouter: Router = express.Router();
@@ -89,12 +89,77 @@ interface: IBook {
  * @apiError (400: Invalid Image Url) {String} message "Invalid or missing Image Url - please refer to documentation"
  * @apiError (400: Invalid Image Small Url) {String} message "Invalid or missing Image Small Url - please refer to documentation"
  */
-booksRouter.post('/', (request: IJwtRequest, response: Response) => {
-    response.status(500).send({
-        message:
-            'Route not currently implemented. Please complain to developers.',
-    });
-});
+booksRouter.post(
+    '/',
+    (request: IJwtRequest, response: Response, next: NextFunction) => {
+        const isbn: number = request.body.isbn13 as number;
+        const authors: string = request.body.authors as string;
+        const publication: number = request.body.publication as number;
+        const original_title: string = request.body.original_title as string;
+        const title: string = request.body.title as string;
+        const rating_avg: number = request.body.ratings.average as number;
+        const rating_count: number = request.body.ratings.count as number;
+        const rating_1_star: number = request.body.ratings.rating1 as number;
+        const rating_2_star: number = request.body.ratings.rating2 as number;
+        const rating_3_star: number = request.body.ratings.rating3 as number;
+        const rating_4_star: number = request.body.ratings.rating4 as number;
+        const rating_5_star: number = request.body.ratings.rating5 as number;
+        const image_url: string = request.body.icons.image_url as string;
+        const image_small_url: string = request.body.icons
+        if (validationFunctions.isNumberProvided(isbn) && isbn >= 0) {
+            next();
+        } else {
+            console.error('Invalid or missing ISBN');
+            response.status(400).send({
+                message:
+                    'Invalid or missing ISBN - please refer to documentation',
+            });
+        }
+    },
+    (request: IJwtRequest, response: Response) => {
+        const theQuery =
+            'INSERT INTO Books (isbn13, publication_year, original_title, title, rating_avg, rating_count, rating_1_star, rating_2_star, rating_3_star, rating_4_star, rating_5_star, image_url, image_small_url) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13) RETURNING *';
+        const values = [
+            request.body.isbn13,
+            request.body.publication,
+            request.body.original_title,
+            request.body.title,
+            request.body.ratings.average,
+            request.body.ratings.count,
+            request.body.ratings.rating1,
+            request.body.ratings.rating2,
+            request.body.ratings.rating3,
+            request.body.ratings.rating4,
+            request.body.ratings.rating5,
+            request.body.icons.image_url,
+            request.body.icons.image_small_url,
+        ];
+
+        pool.query(theQuery, values)
+            .then((result) => {
+                response.status(201).send({
+                    entry: result.rows[0],
+                });
+            })
+            .catch((error) => {
+                if (
+                    error.detail != undefined &&
+                    (error.detail as string).endsWith('already exists.')
+                ) {
+                    console.error('Name exists');
+                    response.status(400).send({
+                        message: 'Name exists',
+                    });
+                } else {
+                    console.error('DB Query error on POST');
+                    console.error(error);
+                    response.status(500).send({
+                        message: 'server error - contact support',
+                    });
+                }
+            });
+    }
+);
 
 /**
  * @api {get} /books/:isbn Request book by ISBN
@@ -210,12 +275,35 @@ booksRouter.get('/isbns/:isbn', (request: IJwtRequest, response: Response) => {
  * @apiError (400: ISBN not in range) {String} message "ISBN not in range - please refer to documentation"
  * @apiError (400: Empty query parameter) {String} message "No query parameter in url"
  */
-booksRouter.delete('/:isbn', (request: IJwtRequest, response: Response) => {
-    response.status(500).send({
-        message:
-            'Route not currently implemented. Please complain to developers.',
-    });
-});
+booksRouter.delete(
+    '/isbns/:isbn',
+    (request: IJwtRequest, response: Response) => {
+        const theQuery = 'DELETE FROM Books WHERE isbn13 = $1 RETURNING *';
+        const values = [request.params.isbn];
+        console.log(values);
+
+        pool.query(theQuery, values)
+            .then((result) => {
+                if (result.rowCount >= 1) {
+                    response.send({
+                        entry: result.rows,
+                    });
+                } else {
+                    response.status(404).send({
+                        message: 'isbn not found',
+                    });
+                }
+            })
+            .catch((error) => {
+                //log the error
+                console.error('DB Query error on DELETE /isbns/:isbn');
+                console.error(error);
+                response.status(500).send({
+                    message: 'server error - contact support',
+                });
+            });
+    }
+);
 
 /**
  * @api {get} /books/rating Request book by rating
@@ -269,41 +357,224 @@ booksRouter.delete('/:isbn', (request: IJwtRequest, response: Response) => {
  * @apiError (400: Missing ordering field in body) {String} message "Missing ordering field in http body - please refer to documentation"
  */
 booksRouter.get(
-    '/ratings/:rating',
+    '/rating',
+    (request: IJwtRequest, response: Response, next: NextFunction) => {
+        const min: number = request.body.min as number;
+        const max: number = request.body.max as number;
+        const order: string = request.body.order as string;
+        if (validationFunctions.isNumberProvided(min) && min > 0 && max > min) {
+            next();
+        } else {
+            console.error('Invalid or missing range');
+            response.status(400).send({
+                message:
+                    'Invalid or missing range - please refer to documentation',
+            });
+        }
+    },
     (request: IJwtRequest, response: Response) => {
-        const theQuery = 'SELECT * FROM Books WHERE rating_avg >= $1';
-        const values = [request.params.rating];
+        const min: number = request.body.min as number;
+        const max: number = request.body.max as number;
+        const order: string = request.body.order as string;
+        const orderBy =
+            order == 'min-first' ? 'rating_avg ASC' : 'rating_avg DESC';
+        const theQuery = `SELECT * FROM Books WHERE rating_avg >= $1 AND rating_avg <= $2 ORDER BY ${orderBy}`;
+        const values = [min, max];
 
         pool.query(theQuery, values)
             .then((result) => {
-                if (result.rowCount >= 1) {
-                    response.send({
-                        entry: result.rows,
-                    });
-                } else {
-                    response.status(404).send({
-                        message: 'Rating not found',
-                    });
-                }
+                response.status(201).send({
+                    entry: result.rows,
+                });
             })
             .catch((error) => {
-                //log the error
-                console.error('DB Query error on GET /ratings/:rating');
-                console.error(error);
-                response.status(500).send({
-                    message: 'server error - contact support',
-                });
+                if (
+                    error.detail != undefined &&
+                    (error.detail as string).endsWith('already exists.')
+                ) {
+                    console.error('Name exists');
+                    response.status(400).send({
+                        message: 'Name exists',
+                    });
+                } else {
+                    console.error('DB Query error on GET');
+                    console.error(error);
+                    response.status(500).send({
+                        message: 'server error - contact support',
+                    });
+                }
             });
     }
 );
 
-booksRouter.put('/rating/:isbn', (request: IJwtRequest, response: Response) => {
-    response.status(500).send({
-        message:
-            'Route not currently implemented. Please complain to developers.',
-    });
-});
+/**
+ * @api {put} /books/rating/:isbn/ Update book ratings
+ * @apiName UpdateBookRating
+ * @apiGroup Books
+ * @apiDescription Update the rating object for a specific book in the database.
+ *
+ * @apiParam {number} isbn A 13-digit ISBN integer. Must be within the range of
+ * <code>10^12 <= isbn < 10^13</code>
+ *
+ * @apiBody {Object} ratings An object representing all the information for
+ * consumer and critic ratings for the given book.
+ * @apiBody {float} ratings.average The mean value of all 5 star ratings for this
+ * book. The value should be between 0 and 5 inclusive.
+ * @apiBody {number} ratings.count The total number of ratings for this book. Must be
+ * positive.
+ * @apiBody{number} ratings.rating1 The total number of 1-star ratings for this book.
+ * Must by positive.
+ * @apiBody {number} ratings.rating2 The total number of 2-star ratings for this book.
+ * Must by positive.
+ * @apiBody {number} ratings.rating3 The total number of 3-star ratings for this book.
+ * Must by positive.
+ * @apiBody {number} ratings.rating4 The total number of 4-star ratings for this book.
+ * Must by positive.
+ * @apiBody {number} ratings.rating5 The total number of 5-star ratings for this book.
+ * Must by positive.
+ *
+ * @apiSuccess {Object} result The book whose ratings are being updated.
+ * @apiSuccess {number} result.isbn13 The ISBN number for the book.
+ * @apiSuccess {string} result.author A comma-separated string of authors who have
+ * contributed to the book.
+ * @apiSuccess {number} result.publication The initial publication date of this book.
+ * @apiSuccess {string} result.original_title The title of the series this book was
+ * printed in. If not in a series, it is a copy of the title attribute. Note that you
+ * cannot consisently rely upon <code>original_title</code> to be applied applicably to
+ * serial publications.
+ * @apiSuccess {string} result.title The title of the book.
+ * @apiSuccess {Object} result.ratings An object representing all the information for
+ * consumer and critic ratings for the given book.
+ * @apiSuccess {float} result.ratings.average The mean value of all 5-star ratings for
+ * this book.
+ * @apiSuccess {number} result.ratings.count The total number of ratings for this book.
+ * @apiSuccess {number} result.ratings.rating1 The total number of 1-star ratings for this book.
+ * @apiSuccess {number} result.ratings.rating2 The total number of 2-star ratings for this book.
+ * @apiSuccess {number} result.ratings.rating3 The total number of 3-star ratings for this book.
+ * @apiSuccess {number} result.ratings.rating4 The total number of 4-star ratings for this book.
+ * @apiSuccess {number} result.ratings.rating5 The total number of 5-star ratings for this book.
+ * @apiSuccess {Object} result.icons An object holding the urls for the images of this book.
+ * @apiSuccess {string} result.icons.large The url whose destination matches an
+ * image for this book. On average, image sizes fall within about <code>98x147</code>
+ * in pixels.
+ * @apiSuccess {string} result.icons.small The url whose destination matches the
+ * image for this book. On average, image sizes fall within about <code>50x75</code>
+ *
+ * @apiError (404: No book with given ISBN) {String} message "No book with given ISBN"
+ * @apiError (400: Query parameter wrong type) {String} message "Query parameter not of required type - please refer to documentation"
+ * @apiError (400: Empty query parameter) {String} message "No query parameter in url"
+ * @apiError (400: Invalid rating average) {String} message "Rating average is not in range of 0 to 5 inclusive - please refer to documentation"
+ * @apiError (400: Invalid rating count) {String} message "Rating count must be positive - please refer to documentation"
+ */
+booksRouter.put('/rating/:isbn', 
+    (request: IJwtRequest, response: Response, next: NextFunction) => {
+        const ratings = request.body.ratings;
+        const rating_avg: number = request.body.ratings.average as number;
+        const rating_count: number = request.body.ratings.count as number;
+        const rating_1_star: number = request.body.ratings.rating1 as number;
+        const rating_2_star: number = request.body.ratings.rating2 as number;
+        const rating_3_star: number = request.body.ratings.rating3 as number;
+        const rating_4_star: number = request.body.ratings.rating4 as number;
+        const rating_5_star: number = request.body.ratings.rating5 as number;
+        
+        if (validationFunctions.isNumberProvided(rating_avg) && rating_count >= 0) {
+            next();
+        } else {
+            console.error('Invalid or missing range');
+            response.status(400).send({
+                message:
+                    'Invalid or missing range - please refer to documentation',
+            });
+        }
+    },
+    (request: IJwtRequest, response: Response) => {
+        const theQuery = `
+            UPDATE Books SET 
+                rating_avg = $1, 
+                rating_count = $2,
+                rating_1_star = $3,
+                rating_2_star = $4,
+                rating_3_star = $5,
+                rating_4_star = $6,
+                rating_5_star = $7
+            WHERE isbn13 = $8
+            RETURNING *`;
+        const values = [
+            request.body.ratings.average,
+            request.body.ratings.count,
+            request.body.ratings.rating1,
+            request.body.ratings.rating2,
+            request.body.ratings.rating3,
+            request.body.ratings.rating4,
+            request.body.ratings.rating5,
+            request.params.isbn,
+        ];
 
+        pool.query(theQuery, values)
+            .then((result) => {
+                response.status(201).send({
+                    entry: result.rows,
+                });
+            })
+            .catch((error) => {
+                if (
+                    error.detail != undefined &&
+                    (error.detail as string).endsWith('already exists.')
+                ) {
+                    console.error('Name exists');
+                    response.status(400).send({
+                        message: 'Name exists',
+                    });
+                } else {
+                    console.error('DB Query error on GET');
+                    console.error(error);
+                    response.status(500).send({
+                        message: 'server error - contact support',
+                    });
+                }
+            });
+    }
+);
+
+/**
+ * @api {get} /books/title/:name Request books by title
+ * @apiName GetBooksByTitle
+ * @apiGroup Books
+ * @apiDescription Retrieve all books that contain a specified string in its title. If
+ * multiple books are returned by this query, it returns them in alphabetical order.
+ *
+ * @apiParam {string} name A keyword to query all book titles.
+ *
+ * @apiSuccess {Object[]} results An aggregate of all books that match the query.
+ * @apiSuccess {number} results.isbn13 The ISBN number for the book.
+ * @apiSuccess {string} results.author A comma-separated string of authors who have
+ * contributed to the book.
+ * @apiSuccess {number} results.publication The initial publication date of this book.
+ * @apiSuccess {string} results.original_title The title of the series this book was
+ * printed in. If not in a series, it is a copy of the title attribute. Note that you
+ * cannot consisently rely upon <code>original_title</code> to be applied applicably to
+ * serial publications.
+ * @apiSuccess {string} results.title The title of the book.
+ * @apiSuccess {Object} results.ratings An object representing all the information for
+ * consumer and critic ratings for the given book.
+ * @apiSuccess {number} results.ratings.average The mean value of all 5-star ratings for
+ * this book.
+ * @apiSuccess {number} results.ratings.count The total number of ratings for this book.
+ * @apiSuccess {number} results.ratings.rating1 The total number of 1-star ratings for this book.
+ * @apiSuccess {number} results.ratings.rating2 The total number of 2-star ratings for this book.
+ * @apiSuccess {number} results.ratings.rating3 The total number of 3-star ratings for this book.
+ * @apiSuccess {number} results.ratings.rating4 The total number of 4-star ratings for this book.
+ * @apiSuccess {number} results.ratings.rating5 The total number of 5-star ratings for this book.
+ * @apiSuccess {Object} results.icons An object holding the urls for the images of this book.
+ * @apiSuccess {string} results.icons.large The url whose destination matches an
+ * image for this book. On average, image sizes fall within about <code>98x147</code>
+ * in pixels.
+ * @apiSuccess {string} results.icons.small The url whose destination matches the
+ * image for this book. On average, image sizes fall within about <code>50x75</code>
+ *
+ * @apiError (404: No book with given title) {String} message "No book with given title"
+ * @apiError (400: Empty query parameter) {String} message "No query parameter in url"
+ */
 booksRouter.get('/title/:name', (request: IJwtRequest, response: Response) => {
     const theQuery = 'SELECT * FROM Books WHERE title = $1';
     const values = [request.params.name];
@@ -372,13 +643,74 @@ booksRouter.get('/title/:name', (request: IJwtRequest, response: Response) => {
 booksRouter.delete(
     '/title/:name',
     (request: IJwtRequest, response: Response) => {
-        response.status(500).send({
-            message:
-                'Route not currently implemented. Please complain to developers.',
-        });
+        const theQuery = 'DELETE FROM Books WHERE title = $1 RETURNING *';
+        const values = [request.params.name];
+        console.log(values);
+
+        pool.query(theQuery, values)
+            .then((result) => {
+                if (result.rowCount >= 1) {
+                    response.send({
+                        entry: result.rows,
+                    });
+                } else {
+                    response.status(404).send({
+                        message: 'title not found',
+                    });
+                }
+            })
+            .catch((error) => {
+                //log the error
+                console.error('DB Query error on DELETE /title/:name');
+                console.error(error);
+                response.status(500).send({
+                    message: 'server error - contact support',
+                });
+            });
     }
 );
 
+/**
+ * @api {get} /books/author/:name Request books by author
+ * @apiName GetBooksByAuthor
+ * @apiGroup Books
+ * @apiDescription Retrieve all books that were written by a specified author. If
+ * multiple books are returned by this query, it returns them in alphabetical order.
+ *
+ * @apiParam {string} name An author's name to query the database. The database is
+ * queried exactly in the form of <code> Firstname Lastname </code>. While not case-sensitive,
+ * only exact matches for first and last are returned.
+ *
+ * @apiSuccess {Object[]} results An aggregate of all books that match the query.
+ * @apiSuccess {number} results.isbn13 The ISBN number for the book.
+ * @apiSuccess {string} results.author A comma-separated string of authors who have
+ * contributed to the book.
+ * @apiSuccess {number} results.publication The initial publication date of this book.
+ * @apiSuccess {string} results.original_title The title of the series this book was
+ * printed in. If not in a series, it is a copy of the title attribute. Note that you
+ * cannot consisently rely upon <code>original_title</code> to be applied applicably to
+ * serial publications.
+ * @apiSuccess {string} results.title The title of the book.
+ * @apiSuccess {Object} results.ratings An object representing all the information for
+ * consumer and critic ratings for the given book.
+ * @apiSuccess {number} results.ratings.average The mean value of all 5-star ratings for
+ * this book.
+ * @apiSuccess {number} results.ratings.count The total number of ratings for this book.
+ * @apiSuccess {number} results.ratings.rating1 The total number of 1-star ratings for this book.
+ * @apiSuccess {number} results.ratings.rating2 The total number of 2-star ratings for this book.
+ * @apiSuccess {number} results.ratings.rating3 The total number of 3-star ratings for this book.
+ * @apiSuccess {number} results.ratings.rating4 The total number of 4-star ratings for this book.
+ * @apiSuccess {number} results.ratings.rating5 The total number of 5-star ratings for this book.
+ * @apiSuccess {Object} results.icons An object holding the urls for the images of this book.
+ * @apiSuccess {string} results.icons.large The url whose destination matches an
+ * image for this book. On average, image sizes fall within about <code>98x147</code>
+ * in pixels.
+ * @apiSuccess {string} results.icons.small The url whose destination matches the
+ * image for this book. On average, image sizes fall within about <code>50x75</code>
+ *
+ * @apiError (404: No book with given title) {String} message "No book with given author"
+ * @apiError (400: Empty query parameter) {String} message "No query parameter in url"
+ */
 booksRouter.get('/author/:name', (request: IJwtRequest, response: Response) => {
     const theQuery = `
         SELECT b.isbn13, b.title, b.original_title, b.publication_year, 
@@ -455,10 +787,31 @@ booksRouter.get('/author/:name', (request: IJwtRequest, response: Response) => {
 booksRouter.delete(
     '/author/:name',
     (request: IJwtRequest, response: Response) => {
-        response.status(500).send({
-            message:
-                'Route not currently implemented. Please complain to developers.',
-        });
+        const theQuery =
+            'DELETE FROM Author WHERE Author_name = $1 RETURNING *';
+        const values = [request.params.name];
+        console.log(values);
+
+        pool.query(theQuery, values)
+            .then((result) => {
+                if (result.rowCount >= 1) {
+                    response.send({
+                        entry: result.rows,
+                    });
+                } else {
+                    response.status(404).send({
+                        message: 'Authors not found',
+                    });
+                }
+            })
+            .catch((error) => {
+                //log the error
+                console.error('DB Query error on DELETE /author/:name');
+                console.error(error);
+                response.status(500).send({
+                    message: 'server error - contact support',
+                });
+            });
     }
 );
 
