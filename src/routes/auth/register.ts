@@ -57,7 +57,7 @@ const emailMiddlewareCheck = (
     } else {
         response.status(400).send({
             message:
-                'Invalid or missing email  - please refer to documentation',
+                'Invalid or missing email - please refer to documentation',
         });
     }
 };
@@ -116,7 +116,7 @@ registerRouter.post(
         } else {
             response.status(400).send({
                 message:
-                    'Invalid or missing phone number  - please refer to documentation',
+                    'Invalid or missing phone number - please refer to documentation',
             });
             return;
         }
@@ -127,7 +127,7 @@ registerRouter.post(
         } else {
             response.status(400).send({
                 message:
-                    'Invalid or missing password  - please refer to documentation',
+                    'Invalid or missing password - please refer to documentation',
             });
         }
     },
@@ -137,7 +137,7 @@ registerRouter.post(
         } else {
             response.status(400).send({
                 message:
-                    'Invalid or missing role  - please refer to documentation',
+                    'Invalid or missing role - please refer to documentation',
             });
         }
     },

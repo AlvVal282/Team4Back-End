@@ -92,20 +92,20 @@ interface: IBook {
 booksRouter.post(
     '/',
     (request: IJwtRequest, response: Response, next: NextFunction) => {
-        const isbn: number = request.body.isbn13 as number;
-        const authors: string = request.body.authors as string;
-        const publication: number = request.body.publication as number;
-        const original_title: string = request.body.original_title as string;
-        const title: string = request.body.title as string;
-        const rating_avg: number = request.body.ratings.average as number;
-        const rating_count: number = request.body.ratings.count as number;
-        const rating_1_star: number = request.body.ratings.rating1 as number;
-        const rating_2_star: number = request.body.ratings.rating2 as number;
-        const rating_3_star: number = request.body.ratings.rating3 as number;
-        const rating_4_star: number = request.body.ratings.rating4 as number;
-        const rating_5_star: number = request.body.ratings.rating5 as number;
-        const image_url: string = request.body.icons.image_url as string;
-        const image_small_url: string = request.body.icons
+        const isbn: number = request.body.entry.isbn13 as number;
+        const authors: string = request.body.entry.authors as string;
+        const publication: number = request.body.entry.publication as number;
+        const original_title: string = request.body.entry.original_title as string;
+        const title: string = request.body.entry.title as string;
+        const rating_avg: number = request.body.entry.ratings.average as number;
+        const rating_count: number = request.body.entry.ratings.count as number;
+        const rating_1_star: number = request.body.entry.ratings.rating1 as number;
+        const rating_2_star: number = request.body.entry.ratings.rating2 as number;
+        const rating_3_star: number = request.body.entry.ratings.rating3 as number;
+        const rating_4_star: number = request.body.entry.ratings.rating4 as number;
+        const rating_5_star: number = request.body.entry.ratings.rating5 as number;
+        const image_url: string = request.body.entry.icons.image_url as string;
+        const image_small_url: string = request.body.entry.icons
         if (validationFunctions.isNumberProvided(isbn) && isbn >= 0) {
             next();
         } else {
@@ -120,19 +120,19 @@ booksRouter.post(
         const theQuery =
             'INSERT INTO Books (isbn13, publication_year, original_title, title, rating_avg, rating_count, rating_1_star, rating_2_star, rating_3_star, rating_4_star, rating_5_star, image_url, image_small_url) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13) RETURNING *';
         const values = [
-            request.body.isbn13,
-            request.body.publication,
-            request.body.original_title,
-            request.body.title,
-            request.body.ratings.average,
-            request.body.ratings.count,
-            request.body.ratings.rating1,
-            request.body.ratings.rating2,
-            request.body.ratings.rating3,
-            request.body.ratings.rating4,
-            request.body.ratings.rating5,
-            request.body.icons.image_url,
-            request.body.icons.image_small_url,
+            request.body.entry.isbn13,
+            request.body.entry.publication,
+            request.body.entry.original_title,
+            request.body.entry.title,
+            request.body.entry.ratings.average,
+            request.body.entry.ratings.count,
+            request.body.entry.ratings.rating1,
+            request.body.entry.ratings.rating2,
+            request.body.entry.ratings.rating3,
+            request.body.entry.ratings.rating4,
+            request.body.entry.ratings.rating5,
+            request.body.entry.icons.image_url,
+            request.body.entry.icons.image_small_url,
         ];
 
         pool.query(theQuery, values)
