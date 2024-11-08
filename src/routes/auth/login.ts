@@ -109,7 +109,7 @@ signinRouter.post(
                         }
                     );
                     //package and send the results
-                    response.json({
+                    response.status(200).json({
                         accessToken,
                         id: result.rows[0].account_id,
                     });
