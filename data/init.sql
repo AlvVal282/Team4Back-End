@@ -8,11 +8,10 @@ CREATE TABLE Demo (DemoID SERIAL PRIMARY KEY,
 
 CREATE TABLE Account (Account_ID SERIAL PRIMARY KEY,
                       FirstName VARCHAR(255) NOT NULL,
-		              LastName VARCHAR(255) NOT NULL,
+                      LastName VARCHAR(255) NOT NULL,
                       Username VARCHAR(255) NOT NULL UNIQUE,
                       Email VARCHAR(255) NOT NULL UNIQUE,
-                      Phone VARCHAR(15) NOT NULL UNIQUE,
-                      Account_Role int NOT NULL
+                      Phone VARCHAR(15) NOT NULL UNIQUE
 );
 
 
