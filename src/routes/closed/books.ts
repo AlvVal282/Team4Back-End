@@ -117,6 +117,10 @@ booksRouter.post(
         }
     },
     (request: IJwtRequest, response: Response) => {
+
+        const authors = request.body.entry.author.split(", ");
+        console.log("AUTHORS DEBUG: " + authors);
+
         const theQuery =
             'INSERT INTO Books (isbn13, publication_year, original_title, title, rating_avg, rating_count, rating_1_star, rating_2_star, rating_3_star, rating_4_star, rating_5_star, image_url, image_small_url) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13) RETURNING *';
         const values = [
@@ -131,16 +135,49 @@ booksRouter.post(
             request.body.entry.ratings.rating3,
             request.body.entry.ratings.rating4,
             request.body.entry.ratings.rating5,
-            request.body.entry.icons.image_url,
-            request.body.entry.icons.image_small_url,
+            request.body.entry.icons.large,
+            request.body.entry.icons.small,
         ];
 
         pool.query(theQuery, values)
-            .then((result) => {
-                response.status(201).send({
-                    entry: result.rows[0],
-                });
-            })
+        .then((queryRes) => {
+            const isbn13 = queryRes.rows[0].isbn13;
+    
+            let ids = [];
+    
+            authors.forEach((author) => {
+                const theQuery = `
+                    INSERT INTO Author (author_name) 
+                    VALUES ($1)
+                    ON CONFLICT (author_name) DO UPDATE 
+                    SET author_name = EXCLUDED.author_name
+                    RETURNING author_id;`;
+                
+                pool.query(theQuery, [author])
+                    .then((queryRes) => {
+                        const id = queryRes.rows[0].author_id;
+                        ids.push(id); 
+                        const theQuery = `
+                            INSERT INTO books_authors (isbn13, author_id) 
+                            VALUES ($1, $2) 
+                            ON CONFLICT (isbn13, author_id) DO NOTHING;
+                            `;
+                        
+                        pool.query(theQuery, [isbn13, id])
+                            .catch((error) => {
+                                console.error('Error inserting into books_authors:', error);
+                            })
+                    })
+                    .catch((error) => {
+                        console.error('Error inserting author:', error);
+                    })
+            });
+    
+            response.status(201).send({
+                message: 'Book and authors inserted successfully',
+                isbn13: isbn13,
+            });
+        })
             .catch((error) => {
                 if (
                     error.detail != undefined &&
