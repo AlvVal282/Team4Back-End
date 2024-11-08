@@ -54,7 +54,7 @@ interface: IBook {
  * @apiBody {string} entry.title The title of the book.
  * @apiBody {Object} entry.ratings An object representing all the information for
  * consumer and critic ratings for the given book.
- * @apiBody {number} entry.ratings.average The mean value of all 5-star ratings for
+ * @apiBody {number} entry.ratings.average The mean value of all ratings for
  * this book. Must be within the range of 0 to 5 inclusive.
  * @apiBody {number} entry.ratings.count The total number of ratings for this book. Must be
  * positive.
@@ -119,7 +119,6 @@ booksRouter.post(
     (request: IJwtRequest, response: Response) => {
 
         const authors = request.body.entry.author.split(", ");
-        console.log("AUTHORS DEBUG: " + authors);
 
         const theQuery =
             'INSERT INTO Books (isbn13, publication_year, original_title, title, rating_avg, rating_count, rating_1_star, rating_2_star, rating_3_star, rating_4_star, rating_5_star, image_url, image_small_url) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13) RETURNING *';
@@ -174,8 +173,7 @@ booksRouter.post(
             });
     
             response.status(201).send({
-                message: 'Book and authors inserted successfully',
-                isbn13: isbn13,
+                message: 'Book successfully added.'
             });
         })
             .catch((error) => {
@@ -222,7 +220,7 @@ booksRouter.post(
  * @apiSuccess {string} result.title The title of the book.
  * @apiSuccess {Object} result.ratings An object representing all the information for
  * consumer and critic ratings for the given book.
- * @apiSuccess {number} result.ratings.average The mean value of all 5-star ratings for
+ * @apiSuccess {number} result.ratings.average The mean value of all ratings for
  * this book.
  * @apiSuccess {number} result.ratings.count The total number of ratings for this book.
  * @apiSuccess {number} result.ratings.rating1 The total number of 1-star ratings for this book.
@@ -292,7 +290,7 @@ booksRouter.get('/isbns/:isbn', (request: IJwtRequest, response: Response) => {
  * @apiSuccess {string} result.title The title of the book.
  * @apiSuccess {Object} result.ratings An object representing all the information for
  * consumer and critic ratings for the given book.
- * @apiSuccess {number} result.ratings.average The mean value of all 5-star ratings for
+ * @apiSuccess {number} result.ratings.average The mean value of all ratings for
  * this book.
  * @apiSuccess {number} result.ratings.count The total number of ratings for this book.
  * @apiSuccess {number} result.ratings.rating1 The total number of 1-star ratings for this book.
@@ -353,7 +351,7 @@ booksRouter.delete(
  * Note that the min - or lower-bound - must be less than or equal to the max - upper-bound.
  *
  * @apiBody {number} min The lower-bound of all average ratings for each book
- * this route returns.
+ * this route returns. The value should be between 1 and 5 inclusive.
  * @apiBody {number} max The upper-bound of all average ratings for each book
  * this route returns.
  * @apiBody {string} order The ordering of the returned books. The only two allowed
@@ -372,7 +370,7 @@ booksRouter.delete(
  * @apiSuccess {string} results.title The title of the book.
  * @apiSuccess {Object} results.ratings An object representing all the information for
  * consumer and critic ratings for the given book.
- * @apiSuccess {number} results.ratings.average The mean value of all 5-star ratings for
+ * @apiSuccess {number} results.ratings.average The mean value of all ratings for
  * this book.
  * @apiSuccess {number} results.ratings.count The total number of ratings for this book.
  * @apiSuccess {number} results.ratings.rating1 The total number of 1-star ratings for this book.
@@ -455,8 +453,8 @@ booksRouter.get(
  *
  * @apiBody {Object} ratings An object representing all the information for
  * consumer and critic ratings for the given book.
- * @apiBody {float} ratings.average The mean value of all 5 star ratings for this
- * book. The value should be between 0 and 5 inclusive.
+ * @apiBody {float} ratings.average The mean value of all ratings for this
+ * book. The value should be between 1 and 5 inclusive.
  * @apiBody {number} ratings.count The total number of ratings for this book. Must be
  * positive.
  * @apiBody{number} ratings.rating1 The total number of 1-star ratings for this book.
@@ -482,7 +480,7 @@ booksRouter.get(
  * @apiSuccess {string} result.title The title of the book.
  * @apiSuccess {Object} result.ratings An object representing all the information for
  * consumer and critic ratings for the given book.
- * @apiSuccess {float} result.ratings.average The mean value of all 5-star ratings for
+ * @apiSuccess {float} result.ratings.average The mean value of all ratings for
  * this book.
  * @apiSuccess {number} result.ratings.count The total number of ratings for this book.
  * @apiSuccess {number} result.ratings.rating1 The total number of 1-star ratings for this book.
@@ -500,7 +498,7 @@ booksRouter.get(
  * @apiError (404: No book with given ISBN) {String} message "No book with given ISBN"
  * @apiError (400: Query parameter wrong type) {String} message "Query parameter not of required type - please refer to documentation"
  * @apiError (400: Empty query parameter) {String} message "No query parameter in url"
- * @apiError (400: Invalid rating average) {String} message "Rating average is not in range of 0 to 5 inclusive - please refer to documentation"
+ * @apiError (400: Invalid rating average) {String} message "Rating average is not in range of 1 to 5 inclusive - please refer to documentation"
  * @apiError (400: Invalid rating count) {String} message "Rating count must be positive - please refer to documentation"
  */
 booksRouter.put('/rating/:isbn', 
@@ -514,7 +512,7 @@ booksRouter.put('/rating/:isbn',
         const rating_4_star: number = request.body.ratings.rating4 as number;
         const rating_5_star: number = request.body.ratings.rating5 as number;
         
-        if (validationFunctions.isNumberProvided(rating_avg) && rating_count >= 0) {
+        if (validationFunctions.isNumberProvided(rating_avg) && rating_count >= 1) {
             next();
         } else {
             console.error('Invalid or missing range');
@@ -594,7 +592,7 @@ booksRouter.put('/rating/:isbn',
  * @apiSuccess {string} results.title The title of the book.
  * @apiSuccess {Object} results.ratings An object representing all the information for
  * consumer and critic ratings for the given book.
- * @apiSuccess {number} results.ratings.average The mean value of all 5-star ratings for
+ * @apiSuccess {number} results.ratings.average The mean value of all ratings for
  * this book.
  * @apiSuccess {number} results.ratings.count The total number of ratings for this book.
  * @apiSuccess {number} results.ratings.rating1 The total number of 1-star ratings for this book.
@@ -659,7 +657,7 @@ booksRouter.get('/title/:name', (request: IJwtRequest, response: Response) => {
  * @apiSuccess {string} results.title The title of the book.
  * @apiSuccess {Object} results.ratings An object representing all the information for
  * consumer and critic ratings for the given book.
- * @apiSuccess {number} results.ratings.average The mean value of all 5-star ratings for
+ * @apiSuccess {number} results.ratings.average The mean value of all ratings for
  * this book.
  * @apiSuccess {number} results.ratings.count The total number of ratings for this book.
  * @apiSuccess {number} results.ratings.rating1 The total number of 1-star ratings for this book.
@@ -730,7 +728,7 @@ booksRouter.delete(
  * @apiSuccess {string} results.title The title of the book.
  * @apiSuccess {Object} results.ratings An object representing all the information for
  * consumer and critic ratings for the given book.
- * @apiSuccess {number} results.ratings.average The mean value of all 5-star ratings for
+ * @apiSuccess {number} results.ratings.average The mean value of all ratings for
  * this book.
  * @apiSuccess {number} results.ratings.count The total number of ratings for this book.
  * @apiSuccess {number} results.ratings.rating1 The total number of 1-star ratings for this book.
@@ -803,7 +801,7 @@ booksRouter.get('/author/:name', (request: IJwtRequest, response: Response) => {
  * @apiSuccess {string} results.title The title of the book.
  * @apiSuccess {Object} results.ratings An object representing all the information for
  * consumer and critic ratings for the given book.
- * @apiSuccess {number} results.ratings.average The mean value of all 5-star ratings for
+ * @apiSuccess {number} results.ratings.average The mean value of all ratings for
  * this book.
  * @apiSuccess {number} results.ratings.count The total number of ratings for this book.
  * @apiSuccess {number} results.ratings.rating1 The total number of 1-star ratings for this book.
