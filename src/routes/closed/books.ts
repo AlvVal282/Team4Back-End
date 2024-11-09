@@ -58,6 +58,18 @@ function toBook(row): IBook {
     };
 }
 
+const verifyElement = (isValid, name, response) => {
+    if (!isValid) {
+        console.error('Invalid or ' + name);
+        response.status(400).send({
+            message:
+                'Invalid or missing ' + name + ' - please refer to documentation',
+        });
+    }
+}
+
+
+
 /**
  * @api {post} /books Request to add a book
  * @apiName AddBook
@@ -104,7 +116,6 @@ function toBook(row): IBook {
  * @apiSuccess (201: Succesfully added) {String} message "Book successfully added."
  *
  * @apiError (400: Book exists) {String} message "Book exists"
- * @apiError (400: Missing Parameters) {String} message "Missing required information - please refer to documentation"
  * @apiError (400: Invalid ISBN) {String} message "Invalid or missing ISBN - please refer to documentation"
  * @apiError (400: Invalid Authors) {String} message "Invalid or missing Authors - please refer to documentation"
  * @apiError (400: Invalid Publication) {String} message "Invalid or missing Publication - please refer to documentation"
@@ -116,7 +127,7 @@ function toBook(row): IBook {
  */
 booksRouter.post(
     '/',
-    (request: IJwtRequest, response: Response, next: NextFunction) => {
+    (request: Request, response: Response, next: NextFunction) => {
         const isbn: number = request.body.entry.isbn13 as number;
         if (validationFunctions.isNumberProvided(isbn) && isbn >= 0) {
             next();
@@ -127,6 +138,18 @@ booksRouter.post(
                     'Invalid or missing ISBN - please refer to documentation',
             });
         }
+    },
+    (request: Request, response: Response, next: NextFunction) => {
+        verifyElement(
+            validationFunctions.isStringProvided(request.body.entry.author),
+            "Authors",
+            response
+        );
+        verifyElement(
+            validationFunctions.isStringProvided(request.body.entry.author),
+            "Authors",
+            response
+        );
     },
     (request: IJwtRequest, response: Response) => {
         const theQuery =
