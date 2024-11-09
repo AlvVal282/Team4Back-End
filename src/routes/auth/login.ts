@@ -10,7 +10,7 @@ import {
 } from '../../core/utilities';
 
 export interface Auth {
-    email: string;
+    username: string;
     password: string;
 }
 
@@ -32,6 +32,8 @@ const key = {
  * @apiName PostLogin
  * @apiGroup Auth
  *
+ * @apiDescription Return a newly created JWT for a user with a given username and password.
+ *
  * @apiBody {string} username The username for the registered user.
  * @apiBody {string} password The password matching the login credentials for the registered user.
  *
@@ -40,11 +42,11 @@ const key = {
  * @apiSuccess {string} user.email The email address for the user associated with <code>username</code>.
  * @apiSuccess {string} user.firstname The first name for the user associated with <code>username</code>.
  *
- * @apiError (400: Missing Username) {String} message "Missing username - please refer to documentation"
- * @apiError (400: Invalid Password) {String} message "Invalid or missing password - please refer to documentation"
- * @apiError (400: Invalid Credentials) {String} message "Invalid Credentials" when either the
- * supplied email does not exist in the dataset or the supplied password does not match the
- * entry in the dataset
+ * @apiError (400: Missing Username) {String} message <code>"Missing username - please refer to documentation"</code>
+ * @apiError (400: Invalid Password) {String} message <code>"Invalid or missing password - please refer to documentation"</code>
+ * @apiError (400: Invalid Credentials) {String} message <code>"Invalid Credentials"</code>
+ *
+ * Occurs when either the supplied username does not exist in the dataset or the supplied password does not match the entry in the dataset.
  *
  */
 signinRouter.post(
@@ -58,7 +60,7 @@ signinRouter.post(
             });
         }
     },
-    (request: Request, response: Response, next: NextFunction) => {
+    (request: AuthRequest, response: Response, next: NextFunction) => {
         if ( isStringProvided(request.body.password) ) {
             next();
         } else {
@@ -67,17 +69,6 @@ signinRouter.post(
             });
         }
     },
-        //if (
-        //    isStringProvided(request.body.email) &&
-        //    isStringProvided(request.body.password)
-        //) {
-        //    next();
-        //} else {
-        //    response.status(400).send({
-        //        message: 'Missing required information',
-        //    });
-        //}
-    //},
     (request: AuthRequest, response: Response) => {
         const theQuery = `SELECT salted_hash, salt, Account_Credential.account_id, account.email, account.firstname, account.lastname, account.phone, account.username, FROM Account_Credential
                       INNER JOIN Account ON

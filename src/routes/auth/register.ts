@@ -87,14 +87,14 @@ const emailMiddlewareCheck = (
  *
  * @apiSuccess (Success 201) {string} accessToken A newly created JWT.
  *
- * @apiError (400: Missing First Name) {String} message "Missing first name - please refer to documentation"
- * @apiError (400: Missing Last Name) {String} message "Missing last name- please refer to documentation"
- * @apiError (400: Missing Username) {String} message "Missing username - please refer to documentation"
- * @apiError (400: Invalid Password) {String} message "Invalid or missing password - please refer to documentation"
- * @apiError (400: Invalid Phone) {String} message "Invalid or missing phone number - please refer to documentation"
- * @apiError (400: Invalid Email) {String} message "Invalid or missing email - please refer to documentation"
- * @apiError (400: Username exists) {String} message "Username exists"
- * @apiError (400: Email exists) {String} message "Email exists"
+ * @apiError (400: Missing First Name) {String} message <code>"Missing first name - please refer to documentation"</code>
+ * @apiError (400: Missing Last Name) {String} message <code>"Missing last name- please refer to documentation"</code>
+ * @apiError (400: Missing Username) {String} message <code>"Missing username - please refer to documentation"</code>
+ * @apiError (400: Invalid Password) {String} message <code>"Invalid or missing password - please refer to documentation"</code>
+ * @apiError (400: Invalid Phone) {String} message <code>"Invalid or missing phone number - please refer to documentation"</code>
+ * @apiError (400: Invalid Email) {String} message <code>"Invalid or missing email - please refer to documentation"</code>
+ * @apiError (400: Username exists) {String} message <code>"Username exists"</code>
+ * @apiError (400: Email exists) {String} message <code>"Email exists"</code>
  *
  */
 registerRouter.post(
@@ -222,6 +222,8 @@ registerRouter.post(
                  * without a PWD! That implementation is up to you if you want to add
                  * that step.
                  **********************************************************************/
+                // TODO
+                // currently not implementing previous comment
 
                 //log the error
                 console.error('DB Query error on register');
