@@ -134,7 +134,7 @@ booksRouter.post(
             response
         );
         verifyElement(
-            validationFunctions.isStringProvided(request.body.entry.author),
+            validationFunctions.isStringProvided(request.body.entry.authors),
             "Authors",
             response
         );
@@ -184,7 +184,7 @@ booksRouter.post(
     },
     (request: IJwtRequest, response: Response) => {
 
-        const authors = request.body.entry.author.split(", ");
+        const authors = request.body.entry.authors.split(", ");
 
         const theQuery =
             'INSERT INTO Books (isbn13, publication_year, original_title, title, rating_avg, rating_count, rating_1_star, rating_2_star, rating_3_star, rating_4_star, rating_5_star, image_url, image_small_url) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13) RETURNING *';
