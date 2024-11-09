@@ -40,7 +40,7 @@ const emailRegex = /^[a-zA-Z0-9.\-_]+@[a-zA-Z0-9\-$&_,~:!]+\.(com|net|edu|dev|go
 const isValidEmail = (email: string): boolean =>
     isStringProvided(email) && emailRegex.exec(email) !== null;
 
-const nameRegex = /^[a-zA-Z]+$/;
+const nameRegex = /^[a-zA-Z']+$/;
 const isValidName = (name: string): boolean =>
     isStringProvided(name) && nameRegex.exec(name) !== null;
 
@@ -83,13 +83,13 @@ const emailMiddlewareCheck = (
  * <strong>Phone Rules</strong>: When passing a phone number string, it must follow the format: <code>###-###-####</code> where <code>#</code>
  * is any number between <code>0-9</code>.
  *
- * @apiBody {string} firstname The registering user's first name. May contain any string of letters of length greater than one. Case-sensitive.
- * @apiBody {string} lastname The registering user's last name. May contain any string of letters of length greater than one. Case-sensitive.
+ * @apiBody {string} firstname The registering user's first name. May contain any string of letters and apostrophes of length greater than one. Case-sensitive.
+ * @apiBody {string} lastname The registering user's last name. May contain any string of letters and apostrophes of length greater than one. Case-sensitive.
  * @apiBody {string} email A unique email address for the registering user following common email address conventions. Refer to API description
  * for more detailed formatting instructions.
  * @apiBody {string} password The registering user's password. For a detailed description of formatting rules please read the API description.
  * @apiBody {string} username A unique username for the registering user. May contain any string of uppercase/lowercase letters and numbers, as
- * well as underscores and periods. Case-sensitive.
+ * well as underscores and periods. Length must be greater than one. Case-sensitive.
  * @apiBody {string} phone A phone number for this user. For detailed formatting details please read API description.
  *
  * @apiSuccess (Success 201) {string} accessToken A newly created JWT.
