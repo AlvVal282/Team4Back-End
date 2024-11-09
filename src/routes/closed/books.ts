@@ -310,7 +310,7 @@ booksRouter.delete(
             .then((result) => {
                 if (result.rowCount >= 1) {
                     response.send({
-                        entry: result.rows,
+                        entry: result.rows[0],
                     });
                 } else {
                     response.status(404).send({
@@ -442,7 +442,7 @@ booksRouter.get(
  *
  * @apiBody {Object} ratings An object representing all the information for
  * consumer and critic ratings for the given book.
- * @apiBody {float} ratings.average The mean value of all ratings for this
+ * @apiBody {number} ratings.average The mean value of all ratings for this
  * book. The value should be between 1 and 5 inclusive.
  * @apiBody {number} ratings.count The total number of ratings for this book. Must be
  * positive.
