@@ -32,15 +32,22 @@ const isValidPassword = (password: string): boolean =>
 // and the client-side validation should match these rules.
 const phoneRegex = /^[0-9]{3}-[0-9]{3}-[0-9]{4}$/;
 const isValidPhone = (phone: string): boolean =>
-    //isStringProvided(phone) && phone.length >= 10;
     isStringProvided(phone) && phoneRegex.exec(phone) !== null;
 
 // Add more/your own email validation here. The *rules* must be documented
 // and the client-side validation should match these rules.
 const emailRegex = /^[a-zA-Z0-9.\-_]+@[a-zA-Z0-9\-$&_,~:!]+\.(com|net|edu|dev|gov|org)$/;
 const isValidEmail = (email: string): boolean =>
-    //isStringProvided(email) && email.includes('@');
     isStringProvided(email) && emailRegex.exec(email) !== null;
+
+const nameRegex = /^[a-zA-Z]+$/;
+const isValidName = (name: string): boolean =>
+    isStringProvided(name) && nameRegex.exec(name) !== null;
+
+const usernameRegex = /^[a-zA-Z0-9]+$/;
+const isValidUsername = (username: string): boolean =>
+    isStringProvided(username) && usernameRegex.exec(username) !== null;
+
 
 // middleware functions may be defined elsewhere!
 const emailMiddlewareCheck = (
@@ -76,19 +83,20 @@ const emailMiddlewareCheck = (
  * <strong>Phone Rules</strong>: When passing a phone number string, it must follow the format: <code>###-###-####</code> where <code>#</code>
  * is any number between <code>0-9</code>.
  *
- * @apiBody {string} firstname The registering user's first name. May contain any string characters. Case-sensitive.
- * @apiBody {string} lastname The registering user's last name. May contain any string characters. Case-sensitive.
+ * @apiBody {string} firstname The registering user's first name. May contain any string of letters of length greater than one. Case-sensitive.
+ * @apiBody {string} lastname The registering user's last name. May contain any string of letters of length greater than one. Case-sensitive.
  * @apiBody {string} email A unique email address for the registering user following common email address conventions. Refer to API description
  * for more detailed formatting instructions.
  * @apiBody {string} password The registering user's password. For a detailed description of formatting rules please read the API description.
- * @apiBody {string} username A unique username for the registering user. May contain any string characters. Case-sensitive.
+ * @apiBody {string} username A unique username for the registering user. May contain any string of uppercase/lowercase letters and numbers.
+ * Case-sensitive.
  * @apiBody {string} phone A phone number for this user. For detailed formatting details please read API description.
  *
  * @apiSuccess (Success 201) {string} accessToken A newly created JWT.
  *
- * @apiError (400: Missing First Name) {String} message <code>"Missing first name - please refer to documentation"</code>
- * @apiError (400: Missing Last Name) {String} message <code>"Missing last name- please refer to documentation"</code>
- * @apiError (400: Missing Username) {String} message <code>"Missing username - please refer to documentation"</code>
+ * @apiError (400: Missing First Name) {String} message <code>"Invalid or missing first name - please refer to documentation"</code>
+ * @apiError (400: Missing Last Name) {String} message <code>"Invalid or missing last name- please refer to documentation"</code>
+ * @apiError (400: Missing Username) {String} message <code>"Invalid or missing username - please refer to documentation"</code>
  * @apiError (400: Invalid Password) {String} message <code>"Invalid or missing password - please refer to documentation"</code>
  * @apiError (400: Invalid Phone) {String} message <code>"Invalid or missing phone number - please refer to documentation"</code>
  * @apiError (400: Invalid Email) {String} message <code>"Invalid or missing email - please refer to documentation"</code>
@@ -100,29 +108,29 @@ registerRouter.post(
     '/register',
     emailMiddlewareCheck, // these middleware functions may be defined elsewhere!
     (request: Request, response: Response, next: NextFunction) => {
-        if (isStringProvided(request.body.firstname)) {
+        if (isValidName(request.body.firstname)) {
             next();
         } else {
             response.status(400).send({
-                message: 'Missing first name - please refer to documentation',
+                message: 'Invalid or missing first name - please refer to documentation',
             });
         }
     },
     (request: Request, response: Response, next: NextFunction) => {
-        if (isStringProvided(request.body.lastname)) {
+        if (isValidName(request.body.lastname)) {
             next();
         } else {
             response.status(400).send({
-                message: 'Missing last name - please refer to documentation',
+                message: 'Invalid or missing last name - please refer to documentation',
             });
         }
     },
     (request: Request, response: Response, next: NextFunction) => {
-        if (isStringProvided(request.body.username)) {
+        if (isValidUsername(request.body.username)) {
             next();
         } else {
             response.status(400).send({
-                message: 'Missing username - please refer to documentation',
+                message: 'Invalid or missing username - please refer to documentation',
             });
         }
     },
