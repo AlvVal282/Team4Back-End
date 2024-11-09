@@ -968,14 +968,10 @@ booksRouter.delete(
 );
 
 /**
- * @api {get} /books/pagiantion/offset Request to retrieve entries by offset pagination
- *
- * @apiDescription Request to retrieve the entries paginated using an entry limit and offset.
- *
- * @apiName Books Offset Pagination
+ * @api {get} /books/pagination/offset Request to retrieve entries by offset pagination
+ * @apiName OffsetPagination
  * @apiGroup Books
- *
- * @apiUse JWT
+ * @apiDescription Request to retrieve the entries paginated using an entry limit and offset.
  *
  * @apiBody {number} limit the number of entry objects to return. Note, if a value less than
  * 0 is provided or a non-numeric value is provided or no value is provided, the default limit
@@ -1018,7 +1014,7 @@ booksRouter.delete(
  * @apiSuccess {number} pagination.offset the number used to offset the lookup of entry objects.
  * @apiSuccess {number} pagination.nextPage the offset that should be used on a preceding call to this route.
  */
-booksRouter.get('/offset', async (request: Request, response: Response) => {
+booksRouter.get('/pagination/offset', async (request: Request, response: Response) => {
     const theQuery = `
     SELECT 
         b.isbn, b.title,b.original_title, b.publication_year, b.rating_avg, b.rating_count,               
@@ -1046,7 +1042,7 @@ OFFSET $2;`;
      * The times used above are solely used as examples.
      */
 
-    // NOTE: +request.query.limit the + tells TS to treat this string as a number
+    // NOTE: +request.body.limit the + tells TS to treat this string as a number
     const limit: number =
         validationFunctions.isNumberProvided(request.body.limit) && +request.body.limit > 0
             ? +request.body.limit
