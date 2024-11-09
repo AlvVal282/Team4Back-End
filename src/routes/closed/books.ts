@@ -402,7 +402,37 @@ GROUP BY
 booksRouter.delete(
     '/isbns/:isbn',
     (request: IJwtRequest, response: Response) => {
-        const theQuery = 'DELETE FROM Books WHERE isbn13 = $1 RETURNING *';
+    const theQuery = `WITH delete_book AS (
+    SELECT
+    b.isbn13,
+    b.title,                         
+    b.original_title,                
+    b.publication_year,              
+    b.rating_avg,                    
+    b.rating_count,                  
+    b.rating_1_star,                 
+    b.rating_2_star,                 
+    b.rating_3_star,                 
+    b.rating_4_star,                 
+    b.rating_5_star,                 
+    b.image_url,                     
+    b.image_small_url,               
+    string_agg(a.Author_name, ', ' ORDER BY a.Author_name) AS authors
+FROM 
+    books b
+JOIN 
+    Books_Authors ba ON b.isbn13 = ba.isbn13
+JOIN 
+    Author a ON ba.Author_id = a.Author_id
+WHERE
+    b.isbn13 = $1
+GROUP BY 
+    b.isbn13, b.title, b.original_title, b.publication_year, 
+    b.rating_avg, b.rating_count, b.rating_1_star, b.rating_2_star,
+    b.rating_3_star, b.rating_4_star, b.rating_5_star, b.image_url, b.image_small_url
+)
+DELETE FROM Books WHERE isbn13 = $1 RETURNING *, (SELECT authors FROM delete_book)` 
+
         const values = [request.params.isbn];
 
         pool.query(theQuery, values)
@@ -501,7 +531,36 @@ booksRouter.get(
         const order: string = request.body.order as string;
         const orderBy =
             order == 'min-first' ? 'rating_avg ASC' : 'rating_avg DESC';
-        const theQuery = `SELECT * FROM Books WHERE rating_avg >= $1 AND rating_avg <= $2 ORDER BY ${orderBy}`;
+    const theQuery = `SELECT 
+    b.isbn13,
+    b.title,                         
+    b.original_title,                
+    b.publication_year,              
+    b.rating_avg,                    
+    b.rating_count,                  
+    b.rating_1_star,                 
+    b.rating_2_star,                 
+    b.rating_3_star,                 
+    b.rating_4_star,                 
+    b.rating_5_star,                 
+    b.image_url,                     
+    b.image_small_url,               
+    string_agg(a.Author_name, ', ' ORDER BY a.Author_name) AS authors
+FROM 
+    books b
+JOIN 
+    Books_Authors ba ON b.isbn13 = ba.isbn13
+JOIN 
+    Author a ON ba.Author_id = a.Author_id
+WHERE
+    rating_avg >= $1 AND rating_avg <= $2 
+GROUP BY 
+    b.isbn13, b.title, b.original_title, b.publication_year, 
+    b.rating_avg, b.rating_count, b.rating_1_star, b.rating_2_star,
+    b.rating_3_star, b.rating_4_star, b.rating_5_star, b.image_url, b.image_small_url
+    ORDER BY ${orderBy}
+;` 
+
         const values = [min, max];
 
         pool.query(theQuery, values)
