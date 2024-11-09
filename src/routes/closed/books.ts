@@ -80,7 +80,7 @@ const verifyElement = (isValid, name, response) => {
  * @apiBody {number} entry.isbn13 The ISBN number for the book. The ISBN number must
  * be an integer of exactly 13 digits; however, leading zeroes are acceptable, in which
  * case it may be less than 13 digits and interpreted as having leading zeroes.
- * @apiBody {string} entry.author A comma-separated string of authors who have
+ * @apiBody {string} entry.authors A comma-separated string of authors who have
  * contributed to the book.
  * @apiBody {number} entry.publication The initial publication year of this book. Negative
  * years are not allowed.
@@ -94,15 +94,15 @@ const verifyElement = (isValid, name, response) => {
  * this book. Must be within the range of 0 to 5 inclusive.
  * @apiBody {number} entry.ratings.count The total number of ratings for this book. Must be
  * positive.
- * @apiBody {number} entry.ratings.rating1 The total number of 1-star ratings for this book.
+ * @apiBody {number} entry.ratings.rating_1 The total number of 1-star ratings for this book.
  * Must be positive.
- * @apiBody {number} entry.ratings.rating2 The total number of 2-star ratings for this book.
+ * @apiBody {number} entry.ratings.rating_2 The total number of 2-star ratings for this book.
  * Must be positive.
- * @apiBody {number} entry.ratings.rating3 The total number of 3-star ratings for this book.
+ * @apiBody {number} entry.ratings.rating_3 The total number of 3-star ratings for this book.
  * Must be positive.
- * @apiBody {number} entry.ratings.rating4 The total number of 4-star ratings for this book.
+ * @apiBody {number} entry.ratings.rating_4 The total number of 4-star ratings for this book.
  * Must be positive.
- * @apiBody {number} entry.ratings.rating5 The total number of 5-star ratings for this book.
+ * @apiBody {number} entry.ratings.rating_5 The total number of 5-star ratings for this book.
  * Must be positive.
  * @apiBody {Object} entry.icons An object holding the urls for the images of this book.
  * @apiBody {string} entry.icons.large The url whose destination matches an image for this book.
@@ -253,7 +253,7 @@ booksRouter.post(
  * @apiSuccess {Object} result The book that matches the exact ISBN number provided
  * as a query parameter.
  * @apiSuccess {number} result.isbn13 The ISBN number for the book.
- * @apiSuccess {string} result.author A comma-separated string of authors who have
+ * @apiSuccess {string} result.authors A comma-separated string of authors who have
  * contributed to the book.
  * @apiSuccess {number} result.publication The initial publication date of this book.
  * @apiSuccess {string} result.original_title The title of the series this book was
@@ -266,11 +266,11 @@ booksRouter.post(
  * @apiSuccess {number} result.ratings.average The mean value of all 5-star ratings for
  * this book.
  * @apiSuccess {number} result.ratings.count The total number of ratings for this book.
- * @apiSuccess {number} result.ratings.rating1 The total number of 1-star ratings for this book.
- * @apiSuccess {number} result.ratings.rating2 The total number of 2-star ratings for this book.
- * @apiSuccess {number} result.ratings.rating3 The total number of 3-star ratings for this book.
- * @apiSuccess {number} result.ratings.rating4 The total number of 4-star ratings for this book.
- * @apiSuccess {number} result.ratings.rating5 The total number of 5-star ratings for this book.
+ * @apiSuccess {number} result.ratings.rating_1 The total number of 1-star ratings for this book.
+ * @apiSuccess {number} result.ratings.rating_2 The total number of 2-star ratings for this book.
+ * @apiSuccess {number} result.ratings.rating_3 The total number of 3-star ratings for this book.
+ * @apiSuccess {number} result.ratings.rating_4 The total number of 4-star ratings for this book.
+ * @apiSuccess {number} result.ratings.rating_5 The total number of 5-star ratings for this book.
  * @apiSuccess {Object} result.icons An object holding the urls for the images of this book.
  * @apiSuccess {string} result.icons.large The url whose destination matches an
  * image for this book. On average, image sizes fall within about <code>98x147</code>
@@ -369,7 +369,7 @@ GROUP BY
  * @apiSuccess {Object} result The book that matches the exact ISBN number provided
  * as a query parameter.
  * @apiSuccess {number} result.isbn13 The ISBN number for the book.
- * @apiSuccess {string} result.author A comma-separated string of authors who have
+ * @apiSuccess {string} result.authors A comma-separated string of authors who have
  * contributed to the book.
  * @apiSuccess {number} result.publication The initial publication date of this book.
  * @apiSuccess {string} result.original_title The title of the series this book was
@@ -382,11 +382,11 @@ GROUP BY
  * @apiSuccess {number} result.ratings.average The mean value of all 5-star ratings for
  * this book.
  * @apiSuccess {number} result.ratings.count The total number of ratings for this book.
- * @apiSuccess {number} result.ratings.rating1 The total number of 1-star ratings for this book.
- * @apiSuccess {number} result.ratings.rating2 The total number of 2-star ratings for this book.
- * @apiSuccess {number} result.ratings.rating3 The total number of 3-star ratings for this book.
- * @apiSuccess {number} result.ratings.rating4 The total number of 4-star ratings for this book.
- * @apiSuccess {number} result.ratings.rating5 The total number of 5-star ratings for this book.
+ * @apiSuccess {number} result.ratings.rating_1 The total number of 1-star ratings for this book.
+ * @apiSuccess {number} result.ratings.rating_2 The total number of 2-star ratings for this book.
+ * @apiSuccess {number} result.ratings.rating_3 The total number of 3-star ratings for this book.
+ * @apiSuccess {number} result.ratings.rating_4 The total number of 4-star ratings for this book.
+ * @apiSuccess {number} result.ratings.rating_5 The total number of 5-star ratings for this book.
  * @apiSuccess {Object} result.icons An object holding the urls for the images of this book.
  * @apiSuccess {string} result.icons.large The url whose destination matches an
  * image for this book. On average, image sizes fall within about <code>98x147</code>
@@ -448,7 +448,7 @@ booksRouter.delete(
  * @apiSuccess {Object[]} results An aggregate of all books that fall within the
  * average rating interval.
  * @apiSuccess {number} results.isbn13 The ISBN number for the book.
- * @apiSuccess {string} results.author A comma-separated string of authors who have
+ * @apiSuccess {string} results.authors A comma-separated string of authors who have
  * contributed to the book.
  * @apiSuccess {number} results.publication The initial publication date of this book.
  * @apiSuccess {string} results.original_title The title of the series this book was
@@ -461,11 +461,11 @@ booksRouter.delete(
  * @apiSuccess {number} results.ratings.average The mean value of all 5-star ratings for
  * this book.
  * @apiSuccess {number} results.ratings.count The total number of ratings for this book.
- * @apiSuccess {number} results.ratings.rating1 The total number of 1-star ratings for this book.
- * @apiSuccess {number} results.ratings.rating2 The total number of 2-star ratings for this book.
- * @apiSuccess {number} results.ratings.rating3 The total number of 3-star ratings for this book.
- * @apiSuccess {number} results.ratings.rating4 The total number of 4-star ratings for this book.
- * @apiSuccess {number} results.ratings.rating5 The total number of 5-star ratings for this book.
+ * @apiSuccess {number} results.ratings.rating_1 The total number of 1-star ratings for this book.
+ * @apiSuccess {number} results.ratings.rating_2 The total number of 2-star ratings for this book.
+ * @apiSuccess {number} results.ratings.rating_3 The total number of 3-star ratings for this book.
+ * @apiSuccess {number} results.ratings.rating_4 The total number of 4-star ratings for this book.
+ * @apiSuccess {number} results.ratings.rating_5 The total number of 5-star ratings for this book.
  * @apiSuccess {Object} results.icons An object holding the urls for the images of this book.
  * @apiSuccess {string} results.icons.large The url whose destination matches an
  * image for this book. On average, image sizes fall within about <code>98x147</code>
@@ -545,20 +545,20 @@ booksRouter.get(
  * book. The value should be between 0 and 5 inclusive.
  * @apiBody {number} ratings.count The total number of ratings for this book. Must be
  * positive.
- * @apiBody{number} ratings.rating1 The total number of 1-star ratings for this book.
+ * @apiBody{number} ratings.rating_1 The total number of 1-star ratings for this book.
  * Must by positive.
- * @apiBody {number} ratings.rating2 The total number of 2-star ratings for this book.
+ * @apiBody {number} ratings.rating_2 The total number of 2-star ratings for this book.
  * Must by positive.
- * @apiBody {number} ratings.rating3 The total number of 3-star ratings for this book.
+ * @apiBody {number} ratings.rating_3 The total number of 3-star ratings for this book.
  * Must by positive.
- * @apiBody {number} ratings.rating4 The total number of 4-star ratings for this book.
+ * @apiBody {number} ratings.rating_4 The total number of 4-star ratings for this book.
  * Must by positive.
- * @apiBody {number} ratings.rating5 The total number of 5-star ratings for this book.
+ * @apiBody {number} ratings.rating_5 The total number of 5-star ratings for this book.
  * Must by positive.
  *
  * @apiSuccess {Object} result The book whose ratings are being updated.
  * @apiSuccess {number} result.isbn13 The ISBN number for the book.
- * @apiSuccess {string} result.author A comma-separated string of authors who have
+ * @apiSuccess {string} result.authors A comma-separated string of authors who have
  * contributed to the book.
  * @apiSuccess {number} result.publication The initial publication date of this book.
  * @apiSuccess {string} result.original_title The title of the series this book was
@@ -571,11 +571,11 @@ booksRouter.get(
  * @apiSuccess {float} result.ratings.average The mean value of all 5-star ratings for
  * this book.
  * @apiSuccess {number} result.ratings.count The total number of ratings for this book.
- * @apiSuccess {number} result.ratings.rating1 The total number of 1-star ratings for this book.
- * @apiSuccess {number} result.ratings.rating2 The total number of 2-star ratings for this book.
- * @apiSuccess {number} result.ratings.rating3 The total number of 3-star ratings for this book.
- * @apiSuccess {number} result.ratings.rating4 The total number of 4-star ratings for this book.
- * @apiSuccess {number} result.ratings.rating5 The total number of 5-star ratings for this book.
+ * @apiSuccess {number} result.ratings.rating_1 The total number of 1-star ratings for this book.
+ * @apiSuccess {number} result.ratings.rating_2 The total number of 2-star ratings for this book.
+ * @apiSuccess {number} result.ratings.rating_3 The total number of 3-star ratings for this book.
+ * @apiSuccess {number} result.ratings.rating_4 The total number of 4-star ratings for this book.
+ * @apiSuccess {number} result.ratings.rating_5 The total number of 5-star ratings for this book.
  * @apiSuccess {Object} result.icons An object holding the urls for the images of this book.
  * @apiSuccess {string} result.icons.large The url whose destination matches an
  * image for this book. On average, image sizes fall within about <code>98x147</code>
@@ -670,7 +670,7 @@ booksRouter.put('/rating/:isbn',
  *
  * @apiSuccess {Object[]} results An aggregate of all books that match the query.
  * @apiSuccess {number} results.isbn13 The ISBN number for the book.
- * @apiSuccess {string} results.author A comma-separated string of authors who have
+ * @apiSuccess {string} results.authors A comma-separated string of authors who have
  * contributed to the book.
  * @apiSuccess {number} results.publication The initial publication date of this book.
  * @apiSuccess {string} results.original_title The title of the series this book was
@@ -683,11 +683,11 @@ booksRouter.put('/rating/:isbn',
  * @apiSuccess {number} results.ratings.average The mean value of all 5-star ratings for
  * this book.
  * @apiSuccess {number} results.ratings.count The total number of ratings for this book.
- * @apiSuccess {number} results.ratings.rating1 The total number of 1-star ratings for this book.
- * @apiSuccess {number} results.ratings.rating2 The total number of 2-star ratings for this book.
- * @apiSuccess {number} results.ratings.rating3 The total number of 3-star ratings for this book.
- * @apiSuccess {number} results.ratings.rating4 The total number of 4-star ratings for this book.
- * @apiSuccess {number} results.ratings.rating5 The total number of 5-star ratings for this book.
+ * @apiSuccess {number} results.ratings.rating_1 The total number of 1-star ratings for this book.
+ * @apiSuccess {number} results.ratings.rating_2 The total number of 2-star ratings for this book.
+ * @apiSuccess {number} results.ratings.rating_3 The total number of 3-star ratings for this book.
+ * @apiSuccess {number} results.ratings.rating_4 The total number of 4-star ratings for this book.
+ * @apiSuccess {number} results.ratings.rating_5 The total number of 5-star ratings for this book.
  * @apiSuccess {Object} results.icons An object holding the urls for the images of this book.
  * @apiSuccess {string} results.icons.large The url whose destination matches an
  * image for this book. On average, image sizes fall within about <code>98x147</code>
@@ -739,7 +739,7 @@ booksRouter.get('/title/:name', (request: IJwtRequest, response: Response) => {
  * @apiSuccess {Object[]} results An aggregate of all books that match the query
  * and were deleted.
  * @apiSuccess {number} results.isbn13 The ISBN number for the book.
- * @apiSuccess {string} results.author A comma-separated string of authors who have
+ * @apiSuccess {string} results.authors A comma-separated string of authors who have
  * contributed to the book.
  * @apiSuccess {number} results.publication The initial publication date of this book.
  * @apiSuccess {string} results.original_title The title of the series this book was
@@ -752,11 +752,11 @@ booksRouter.get('/title/:name', (request: IJwtRequest, response: Response) => {
  * @apiSuccess {number} results.ratings.average The mean value of all 5-star ratings for
  * this book.
  * @apiSuccess {number} results.ratings.count The total number of ratings for this book.
- * @apiSuccess {number} results.ratings.rating1 The total number of 1-star ratings for this book.
- * @apiSuccess {number} results.ratings.rating2 The total number of 2-star ratings for this book.
- * @apiSuccess {number} results.ratings.rating3 The total number of 3-star ratings for this book.
- * @apiSuccess {number} results.ratings.rating4 The total number of 4-star ratings for this book.
- * @apiSuccess {number} results.ratings.rating5 The total number of 5-star ratings for this book.
+ * @apiSuccess {number} results.ratings.rating_1 The total number of 1-star ratings for this book.
+ * @apiSuccess {number} results.ratings.rating_2 The total number of 2-star ratings for this book.
+ * @apiSuccess {number} results.ratings.rating_3 The total number of 3-star ratings for this book.
+ * @apiSuccess {number} results.ratings.rating_4 The total number of 4-star ratings for this book.
+ * @apiSuccess {number} results.ratings.rating_5 The total number of 5-star ratings for this book.
  * @apiSuccess {Object} results.icons An object holding the urls for the images of this book.
  * @apiSuccess {string} results.icons.large The url whose destination matches an
  * image for this book. On average, image sizes fall within about <code>98x147</code>
@@ -810,7 +810,7 @@ booksRouter.delete(
  *
  * @apiSuccess {Object[]} results An aggregate of all books that match the query.
  * @apiSuccess {number} results.isbn13 The ISBN number for the book.
- * @apiSuccess {string} results.author A comma-separated string of authors who have
+ * @apiSuccess {string} results.authors A comma-separated string of authors who have
  * contributed to the book.
  * @apiSuccess {number} results.publication The initial publication date of this book.
  * @apiSuccess {string} results.original_title The title of the series this book was
@@ -823,11 +823,11 @@ booksRouter.delete(
  * @apiSuccess {number} results.ratings.average The mean value of all 5-star ratings for
  * this book.
  * @apiSuccess {number} results.ratings.count The total number of ratings for this book.
- * @apiSuccess {number} results.ratings.rating1 The total number of 1-star ratings for this book.
- * @apiSuccess {number} results.ratings.rating2 The total number of 2-star ratings for this book.
- * @apiSuccess {number} results.ratings.rating3 The total number of 3-star ratings for this book.
- * @apiSuccess {number} results.ratings.rating4 The total number of 4-star ratings for this book.
- * @apiSuccess {number} results.ratings.rating5 The total number of 5-star ratings for this book.
+ * @apiSuccess {number} results.ratings.rating_1 The total number of 1-star ratings for this book.
+ * @apiSuccess {number} results.ratings.rating_2 The total number of 2-star ratings for this book.
+ * @apiSuccess {number} results.ratings.rating_3 The total number of 3-star ratings for this book.
+ * @apiSuccess {number} results.ratings.rating_4 The total number of 4-star ratings for this book.
+ * @apiSuccess {number} results.ratings.rating_5 The total number of 5-star ratings for this book.
  * @apiSuccess {Object} results.icons An object holding the urls for the images of this book.
  * @apiSuccess {string} results.icons.large The url whose destination matches an
  * image for this book. On average, image sizes fall within about <code>98x147</code>
@@ -883,7 +883,7 @@ booksRouter.get('/author/:name', (request: IJwtRequest, response: Response) => {
  *
  * @apiSuccess {Object[]} results An aggregate of all books that match the query.
  * @apiSuccess {number} results.isbn13 The ISBN number for the book.
- * @apiSuccess {string} results.author A comma-separated string of authors who have
+ * @apiSuccess {string} results.authors A comma-separated string of authors who have
  * contributed to the book.
  * @apiSuccess {number} results.publication The initial publication date of this book.
  * @apiSuccess {string} results.original_title The title of the series this book was
@@ -896,11 +896,11 @@ booksRouter.get('/author/:name', (request: IJwtRequest, response: Response) => {
  * @apiSuccess {number} results.ratings.average The mean value of all 5-star ratings for
  * this book.
  * @apiSuccess {number} results.ratings.count The total number of ratings for this book.
- * @apiSuccess {number} results.ratings.rating1 The total number of 1-star ratings for this book.
- * @apiSuccess {number} results.ratings.rating2 The total number of 2-star ratings for this book.
- * @apiSuccess {number} results.ratings.rating3 The total number of 3-star ratings for this book.
- * @apiSuccess {number} results.ratings.rating4 The total number of 4-star ratings for this book.
- * @apiSuccess {number} results.ratings.rating5 The total number of 5-star ratings for this book.
+ * @apiSuccess {number} results.ratings.rating_1 The total number of 1-star ratings for this book.
+ * @apiSuccess {number} results.ratings.rating_2 The total number of 2-star ratings for this book.
+ * @apiSuccess {number} results.ratings.rating_3 The total number of 3-star ratings for this book.
+ * @apiSuccess {number} results.ratings.rating_4 The total number of 4-star ratings for this book.
+ * @apiSuccess {number} results.ratings.rating_5 The total number of 5-star ratings for this book.
  * @apiSuccess {Object} results.icons An object holding the urls for the images of this book.
  * @apiSuccess {string} results.icons.large The url whose destination matches an
  * image for this book. On average, image sizes fall within about <code>98x147</code>
