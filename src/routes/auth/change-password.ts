@@ -23,7 +23,7 @@ const key = {
     secret: process.env.JSON_WEB_TOKEN,
 };
 
-const passRegex = /^[a-zA-Z][a-zA-Z0-9!@#$%^&*]{7,19}$/;
+const passRegex = /^[a-zA-Z0-9!@#$%^&*_]{8,20}$/;
 const isValidPassword = (password: string): boolean =>
     isStringProvided(password) && passRegex.exec(password) !== null;
 
@@ -82,7 +82,7 @@ changePasswordRouter.put(
         }
     },
     (request: IUserRequest, response: Response, next: NextFunction) => {
-        const theQuery = `SELECT salted_hash, salt, Account_Credential.account_id, account.email, account.firstname, account.lastname, account.phone, account.username, FROM Account_Credential
+        const theQuery = `SELECT salted_hash, salt, Account_Credential.account_id, account.email, account.firstname, account.lastname, account.phone, account.username FROM Account_Credential
                       INNER JOIN Account ON
                       Account_Credential.account_id=Account.account_id 
                       WHERE Account.username=$1`;
