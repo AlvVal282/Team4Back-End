@@ -44,7 +44,7 @@ const nameRegex = /^[a-zA-Z]+$/;
 const isValidName = (name: string): boolean =>
     isStringProvided(name) && nameRegex.exec(name) !== null;
 
-const usernameRegex = /^[a-zA-Z0-9]+$/;
+const usernameRegex = /^[a-zA-Z0-9_.]+$/;
 const isValidUsername = (username: string): boolean =>
     isStringProvided(username) && usernameRegex.exec(username) !== null;
 
@@ -88,8 +88,8 @@ const emailMiddlewareCheck = (
  * @apiBody {string} email A unique email address for the registering user following common email address conventions. Refer to API description
  * for more detailed formatting instructions.
  * @apiBody {string} password The registering user's password. For a detailed description of formatting rules please read the API description.
- * @apiBody {string} username A unique username for the registering user. May contain any string of uppercase/lowercase letters and numbers.
- * Case-sensitive.
+ * @apiBody {string} username A unique username for the registering user. May contain any string of uppercase/lowercase letters and numbers, as
+ * well as underscores and periods. Case-sensitive.
  * @apiBody {string} phone A phone number for this user. For detailed formatting details please read API description.
  *
  * @apiSuccess (Success 201) {string} accessToken A newly created JWT.

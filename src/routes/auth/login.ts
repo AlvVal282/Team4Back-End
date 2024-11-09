@@ -70,7 +70,7 @@ signinRouter.post(
         }
     },
     (request: AuthRequest, response: Response) => {
-        const theQuery = `SELECT salted_hash, salt, Account_Credential.account_id, account.email, account.firstname, account.lastname, account.phone, account.username, FROM Account_Credential
+        const theQuery = `SELECT salted_hash, salt, Account_Credential.account_id, account.email, account.firstname, account.lastname, account.phone, account.username FROM Account_Credential
                       INNER JOIN Account ON
                       Account_Credential.account_id=Account.account_id 
                       WHERE Account.username=$1`;
