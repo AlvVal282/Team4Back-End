@@ -24,20 +24,20 @@ export interface IUserRequest extends Request {
     id: number;
 }
 
-const passRegex = /^[a-zA-Z][a-zA-Z0-9!@#$%^&*]{7,19}$/;
+const passRegex = /^[a-zA-Z0-9!@#$%^&*_]{8,20}$/;
 const isValidPassword = (password: string): boolean =>
     isStringProvided(password) && passRegex.exec(password) !== null;
 
 // Add more/your own phone number validation here. The *rules* must be documented
 // and the client-side validation should match these rules.
-const phoneRegex = /^\([0-9]{3}\) [0-9]{3}-[0-9]{4}$/;
+const phoneRegex = /^[0-9]{3}-[0-9]{3}-[0-9]{4}$/;
 const isValidPhone = (phone: string): boolean =>
     //isStringProvided(phone) && phone.length >= 10;
     isStringProvided(phone) && phoneRegex.exec(phone) !== null;
 
 // Add more/your own email validation here. The *rules* must be documented
 // and the client-side validation should match these rules.
-const emailRegex = /^[a-zA-Z]+@[a-zA-Z0-9\-$&_,~:!]\.(com|net|edu|dev|gov|org)$/;
+const emailRegex = /^[a-zA-Z0-9.\-_]+@[a-zA-Z0-9\-$&_,~:!]+\.(com|net|edu|dev|gov|org)$/;
 const isValidEmail = (email: string): boolean =>
     //isStringProvided(email) && email.includes('@');
     isStringProvided(email) && emailRegex.exec(email) !== null;
@@ -70,11 +70,10 @@ const emailMiddlewareCheck = (
  * <code>dev</code>, <code>gov</code>, and <code>org</code>. Emails between accounts must be unique to that account. Note that missing parameters
  * will return a <code>400: Error</code> only for individual missing fields at a time.
  *
- * <strong>Password rules</strong>: Passwords must be have a string length between 8 and 20 characters, inclusive. All passwords must start with
- * one letter, followed by between 7 and 19 letters, numbers, and/or special characters in the set of: <code>!, @, #, $, %, ^, &, *</code>. When
- * using your password to login, capitalization matters.
+ * <strong>Password rules</strong>: Passwords must be have a string length between 8 and 20 characters, inclusive. Passwords may contain any combination
+ * of letters, numbers, and/or special characters in the set of: <code>!, @, #, $, %, ^, &, *, _</code>. Passwords are stored in a case-sensitive manner.
  *
- * <strong>Phone Rules</strong>: When passing a phone number string, it must follow the format: <code>(###) ###-####</code> where <code>#</code>
+ * <strong>Phone Rules</strong>: When passing a phone number string, it must follow the format: <code>###-###-####</code> where <code>#</code>
  * is any number between <code>0-9</code>.
  *
  * @apiBody {string} firstname The registering user's first name. May contain any string characters. Case-sensitive.
@@ -211,8 +210,7 @@ registerRouter.post(
                 console.dir({ ...request.body, password: '******' });
                 //We successfully added the user!
                 response.status(201).send({
-                    accessToken,
-                    id: request.id,
+                    accessToken
                 });
             })
             .catch((error) => {
