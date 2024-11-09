@@ -509,7 +509,7 @@ booksRouter.get(
  * @apiDescription Update the rating object for a specific book in the database.
  *
  * @apiParam {number} isbn A 13-digit ISBN integer. Must be within the range of
- * <code>10^12 <= isbn < 10^13</code>
+ * <code>0 <= isbn < 10^13</code>
  *
  * @apiBody {Object} ratings An object representing all the information for
  * consumer and critic ratings for the given book.
@@ -677,8 +677,12 @@ booksRouter.get('/title/:name', (request: IJwtRequest, response: Response) => {
     pool.query(theQuery, values)
         .then((result) => {
             if (result.rowCount >= 1) {
+                let aggregate = [];
+                for (let i = 0; i < result.rowCount; i++) {
+                    aggregate.push( toBook(result.rows[i]) );
+                }
                 response.send({
-                    entry: result.rows,
+                    results: aggregate,
                 });
             } else {
                 response.status(404).send({
@@ -890,8 +894,12 @@ booksRouter.delete(
         pool.query(theQuery, values)
             .then((result) => {
                 if (result.rowCount >= 1) {
+                    let aggregate = [];
+                    for (let i = 0; i < result.rowCount; i++) {
+                        aggregate.push( toBook(result.rows[i]) );
+                    }
                     response.send({
-                        entry: result.rows,
+                        results: aggregate,
                     });
                 } else {
                     response.status(404).send({
