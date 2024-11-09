@@ -815,4 +815,112 @@ booksRouter.delete(
     }
 );
 
+/**
+ * @apiDefine JWT
+ * @apiHeader {String} Authorization The string "Bearer " + a valid JSON Web Token (JWT).
+ */
+
+/**
+ * @api {get} /books/offset Request to retrieve entries by offset pagination
+ *
+ * @apiDescription Request to retrieve paginated the entries using an entry limit and offset.
+ *
+ * @apiName Books Offset Pagination
+ * @apiGroup Books
+ *
+ * @apiUse JWT
+ *
+ * @apiBody {number} limit the number of entry objects to return. Note, if a value less than
+ * 0 is provided or a non-numeric value is provided or no value is provided, the default limit
+ * amount of 16 will be used.
+ *
+ * @apiBody {number} offset the number to offset the lookup of entry objects to return. Note,
+ * if a value less than 0 is provided or a non-numeric value is provided or no value is provided,
+ * the default offset of 0 will be used.
+ *
+ * @apiSuccess {Object[]} results An aggregate of all books that match the query.
+ * @apiSuccess {number} results.isbn13 The ISBN number for the book.
+ * @apiSuccess {string} results.author A comma-separated string of authors who have
+ * contributed to the book.
+ * @apiSuccess {number} results.publication The initial publication date of this book.
+ * @apiSuccess {string} results.original_title The title of the series this book was
+ * printed in. If not in a series, it is a copy of the title attribute. Note that you
+ * cannot consisently rely upon <code>original_title</code> to be applied applicably to
+ * serial publications.
+ * @apiSuccess {string} results.title The title of the book.
+ * @apiSuccess {Object} results.ratings An object representing all the information for
+ * consumer and critic ratings for the given book.
+ * @apiSuccess {number} results.ratings.average The mean value of all 5-star ratings for
+ * this book.
+ * @apiSuccess {number} results.ratings.count The total number of ratings for this book.
+ * @apiSuccess {number} results.ratings.rating1 The total number of 1-star ratings for this book.
+ * @apiSuccess {number} results.ratings.rating2 The total number of 2-star ratings for this book.
+ * @apiSuccess {number} results.ratings.rating3 The total number of 3-star ratings for this book.
+ * @apiSuccess {number} results.ratings.rating4 The total number of 4-star ratings for this book.
+ * @apiSuccess {number} results.ratings.rating5 The total number of 5-star ratings for this book.
+ * @apiSuccess {Object} results.icons An object holding the urls for the images of this book.
+ * @apiSuccess {string} results.icons.large The url whose destination matches an
+ * image for this book. On average, image sizes fall within about <code>98x147</code>
+ * in pixels.
+ * @apiSuccess {string} results.icons.small The url whose destination matches the
+ * image for this book. On average, image sizes fall within about <code>50x75</code>
+ *
+ * @apiSuccess {Object} pagination metadata results from this paginated query
+ * @apiSuccess {number} pagination.totalRecords the most recent count on the total amount of entries. May be stale.
+ * @apiSuccess {number} pagination.limit the number of entry objects to returned.
+ * @apiSuccess {number} pagination.offset the number used to offset the lookup of entry objects.
+ * @apiSuccess {number} pagination.nextPage the offset that should be used on a preceding call to this route.
+ */
+messageRouter.get('/offset', async (request: Request, response: Response) => {
+    const theQuery = `
+        SELECT b.isbn13, b.title, b.original_title, b.publication_year, 
+               b.rating_avg, b.rating_count, b.image_url 
+        FROM Books b 
+        JOIN Books_Authors ba ON b.isbn13 = ba.isbn13 
+        JOIN Author a ON ba.Author_ID = a.Author_ID 
+        ORDER BY b.id
+        LIMIT $1
+        OFFSET $2`;
+    /*
+     * NOTE: Using OFFSET in the query can lead to poor performance on large datasets as
+     * the DBMS has to scan all of the results up to the offset to "get" to it.
+     * The performance hit is roughly linear [O(n)] in performance. So, if the offset is
+     * close to the end of the data set and the dataset has 1000 entries and this query takes
+     * 1ms, a dataset with 100,000 entries will take 100ms and 1,000,000 will take 1,000ms or 1s!
+     * The times used above are solely used as examples.
+     */
+
+    // NOTE: +request.query.limit the + tells TS to treat this string as a number
+    const limit: number =
+        isNumberProvided(request.query.limit) && +request.query.limit > 0
+            ? +request.query.limit
+            : 16;
+    const offset: number =
+        isNumberProvided(request.query.offset) && +request.query.offset >= 0
+            ? +request.query.offset
+            : 0;
+
+    const values = [limit, offset];
+
+    // demonstrating deconstructing the returned object. const { rows }
+    const { rows } = await pool.query(theQuery, values);
+
+    // This query is SLOW on large datasets! - Beware!
+    const result = await pool.query(
+        'SELECT count(*) AS exact_count FROM Books;'
+    );
+    const count = result.rows[0].exact_count;
+
+    response.send({
+        results: rows,
+        pagination: {
+            totalRecords: count,
+            limit,
+            offset,
+            nextPage: limit + offset,
+        },
+    });
+});
+
+
 export { booksRouter };
