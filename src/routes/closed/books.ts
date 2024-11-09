@@ -816,14 +816,9 @@ booksRouter.delete(
 );
 
 /**
- * @apiDefine JWT
- * @apiHeader {String} Authorization The string "Bearer " + a valid JSON Web Token (JWT).
- */
-
-/**
- * @api {get} /books/offset Request to retrieve entries by offset pagination
+ * @api {get} /books/pagiantion/offset Request to retrieve entries by offset pagination
  *
- * @apiDescription Request to retrieve paginated the entries using an entry limit and offset.
+ * @apiDescription Request to retrieve the entries paginated using an entry limit and offset.
  *
  * @apiName Books Offset Pagination
  * @apiGroup Books
@@ -840,7 +835,7 @@ booksRouter.delete(
  *
  * @apiSuccess {Object[]} results An aggregate of all books that match the query.
  * @apiSuccess {number} results.isbn13 The ISBN number for the book.
- * @apiSuccess {string} results.author A comma-separated string of authors who have
+ * @apiSuccess {string} results.authors A comma-separated string of authors who have
  * contributed to the book.
  * @apiSuccess {number} results.publication The initial publication date of this book.
  * @apiSuccess {string} results.original_title The title of the series this book was
@@ -853,11 +848,11 @@ booksRouter.delete(
  * @apiSuccess {number} results.ratings.average The mean value of all 5-star ratings for
  * this book.
  * @apiSuccess {number} results.ratings.count The total number of ratings for this book.
- * @apiSuccess {number} results.ratings.rating1 The total number of 1-star ratings for this book.
- * @apiSuccess {number} results.ratings.rating2 The total number of 2-star ratings for this book.
- * @apiSuccess {number} results.ratings.rating3 The total number of 3-star ratings for this book.
- * @apiSuccess {number} results.ratings.rating4 The total number of 4-star ratings for this book.
- * @apiSuccess {number} results.ratings.rating5 The total number of 5-star ratings for this book.
+ * @apiSuccess {number} results.ratings.rating_1 The total number of 1-star ratings for this book.
+ * @apiSuccess {number} results.ratings.rating_2 The total number of 2-star ratings for this book.
+ * @apiSuccess {number} results.ratings.rating_3 The total number of 3-star ratings for this book.
+ * @apiSuccess {number} results.ratings.rating_4 The total number of 4-star ratings for this book.
+ * @apiSuccess {number} results.ratings.rating_5 The total number of 5-star ratings for this book.
  * @apiSuccess {Object} results.icons An object holding the urls for the images of this book.
  * @apiSuccess {string} results.icons.large The url whose destination matches an
  * image for this book. On average, image sizes fall within about <code>98x147</code>
@@ -873,14 +868,23 @@ booksRouter.delete(
  */
 messageRouter.get('/offset', async (request: Request, response: Response) => {
     const theQuery = `
-        SELECT b.isbn13, b.title, b.original_title, b.publication_year, 
-               b.rating_avg, b.rating_count, b.image_url 
-        FROM Books b 
-        JOIN Books_Authors ba ON b.isbn13 = ba.isbn13 
-        JOIN Author a ON ba.Author_ID = a.Author_ID 
-        ORDER BY b.id
-        LIMIT $1
-        OFFSET $2`;
+    SELECT 
+        b.isbn, b.title,b.original_title, b.publication_year, b.rating_avg, b.rating_count,               
+    b.rating_1_star, b.rating_2_star, b.rating_3_star, b.rating_4_star, b.rating_5_star,              
+    b.image_url, b.image_small_url,               
+    string_agg(a.author_name, ', ' ORDER BY a.author_name) AS authors
+FROM 
+    Books b
+JOIN 
+    Books_Authors ba ON b.isbn = ba.isbn
+JOIN 
+    Author a ON ba.author_id = a.author_id
+GROUP BY 
+    b.isbn, b.title, b.original_title, b.publication_year, 
+    b.rating_avg, b.rating_count, b.rating_1_star, b.rating_2_star,
+    b.rating_3_star, b.rating_4_star, b.rating_5_star, b.image_url, b.image_small_url
+LIMIT $1
+OFFSET $2;`;
     /*
      * NOTE: Using OFFSET in the query can lead to poor performance on large datasets as
      * the DBMS has to scan all of the results up to the offset to "get" to it.
@@ -892,11 +896,11 @@ messageRouter.get('/offset', async (request: Request, response: Response) => {
 
     // NOTE: +request.query.limit the + tells TS to treat this string as a number
     const limit: number =
-        isNumberProvided(request.query.limit) && +request.query.limit > 0
+        isNumberProvided(request.body.limit) && +request.body.limit > 0
             ? +request.body.limit
             : 16;
     const offset: number =
-        isNumberProvided(request.query.offset) && +request.query.offset >= 0
+        isNumberProvided(request.body.offset) && +request.body.offset >= 0
             ? +request.body.offset
             : 0;
 
@@ -910,9 +914,9 @@ messageRouter.get('/offset', async (request: Request, response: Response) => {
         'SELECT count(*) AS exact_count FROM Books;'
     );
     const count = result.rows[0].exact_count;
-
+    
     response.send({
-        results: rows,
+        results: rows.map((b) => toBook(b)),
         pagination: {
             totalRecords: count,
             limit,
