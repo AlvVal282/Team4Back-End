@@ -1061,7 +1061,7 @@ OFFSET $2;`;
     const result = await pool.query(
         'SELECT count(*) AS exact_count FROM Books;'
     );
-    const count = result.rows[0].exact_count;
+    const count = parseInt(result.rows[0].exact_count);
     
     response.send({
         results: rows.map((b) => toBook(b)),
