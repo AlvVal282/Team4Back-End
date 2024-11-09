@@ -299,6 +299,7 @@ booksRouter.get(
                 message: 'ISBN not in range - please refer to documentation',
             });
         }
+        next();
     },
     (request: IJwtRequest, response: Response) => {
     const theQuery = 'SELECT * FROM Books WHERE isbn13 = $1';
