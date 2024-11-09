@@ -1015,6 +1015,15 @@ GROUP BY
                 response.status(404).send({
                     message: 'Author not found',
                 });
+                            }
+            })
+            .catch((error) => {
+                //log the error
+                console.error('DB Query error on GET /author/:name');
+                console.error(error);
+                response.status(500).send({
+                    message: 'server error - contact support',
+                });
             });
 });
 
