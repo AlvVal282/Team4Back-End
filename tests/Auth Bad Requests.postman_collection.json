@@ -1,0 +1,334 @@
+{
+	"info": {
+		"_postman_id": "433d99ed-e68a-4ebc-8f31-a146067ad11a",
+		"name": "Auth Bad Requests",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "39610924",
+		"_collection_link": "https://team00-5537.postman.co/workspace/460-Testing~ea29f3ac-e6c6-47cf-bff3-dd128dc298a9/collection/38937033-433d99ed-e68a-4ebc-8f31-a146067ad11a?action=share&source=collection_link&creator=39610924"
+	},
+	"item": [
+		{
+			"name": "Register 400 Errors",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"const testCases = [\r",
+							"    // Test cases for \"firstname\"\r",
+							"    { \r",
+							"        input: { \"firstname\": \"\", \"lastname\": \"Doe\", \"email\": \"john.doe@test.com\", \"password\": \"Password123\", \"username\": \"johndoe\", \"phone\": \"123-456-7890\" }, \r",
+							"        expectedMessage: \"Invalid or missing first name - please refer to documentation\" \r",
+							"    },\r",
+							"    { \r",
+							"        input: { \"firstname\": null, \"lastname\": \"Doe\", \"email\": \"john.doe@test.com\", \"password\": \"Password123\", \"username\": \"johndoe\", \"phone\": \"123-456-7890\" }, \r",
+							"        expectedMessage: \"Invalid or missing first name - please refer to documentation\" \r",
+							"    },\r",
+							"    { \r",
+							"        input: { \"firstname\": \"123\", \"lastname\": \"Doe\", \"email\": \"john.doe@test.com\", \"password\": \"Password123\", \"username\": \"johndoe\", \"phone\": \"123-456-7890\" }, \r",
+							"        expectedMessage: \"Invalid or missing first name - please refer to documentation\" \r",
+							"    },\r",
+							"\r",
+							"    // Test cases for \"lastname\"\r",
+							"    { \r",
+							"        input: { \"firstname\": \"John\", \"lastname\": \"\", \"email\": \"john.doe@example.com\", \"password\": \"Password123\", \"username\": \"johndoe\", \"phone\": \"123-456-7890\" }, \r",
+							"        expectedMessage: \"Invalid or missing last name - please refer to documentation\" \r",
+							"    },\r",
+							"    { \r",
+							"        input: { \"firstname\": \"John\", \"lastname\": null, \"email\": \"john.doe@test.com\", \"password\": \"Password123\", \"username\": \"johndoe\", \"phone\": \"123-456-7890\" }, \r",
+							"        expectedMessage: \"Invalid or missing last name - please refer to documentation\" \r",
+							"    },\r",
+							"    { \r",
+							"        input: { \"firstname\": \"John\", \"lastname\": \"123\", \"email\": \"john.doe@test.com\", \"password\": \"Password123\", \"username\": \"johndoe\", \"phone\": \"123-456-7890\" }, \r",
+							"        expectedMessage: \"Invalid or missing last name - please refer to documentation\" \r",
+							"    },\r",
+							"\r",
+							"    // Test cases for \"email\"\r",
+							"    { \r",
+							"        input: { \"firstname\": \"John\", \"lastname\": \"Doe\", \"email\": \"\", \"password\": \"Password123\", \"username\": \"johndoe\", \"phone\": \"123-456-7890\" }, \r",
+							"        expectedMessage: \"Invalid or missing email - please refer to documentation\"\r",
+							"    },\r",
+							"    { \r",
+							"        input: { \"firstname\": \"John\", \"lastname\": \"Doe\", \"email\": null, \"password\": \"Password123\", \"username\": \"johndoe\", \"phone\": \"123-456-7890\" }, \r",
+							"        expectedMessage: \"Invalid or missing email - please refer to documentation\" \r",
+							"    },\r",
+							"    { \r",
+							"        input: { \"firstname\": \"John\", \"lastname\": \"Doe\", \"email\": \"notanemail\", \"password\": \"Password123\", \"username\": \"johndoe\", \"phone\": \"123-456-7890\" }, \r",
+							"        expectedMessage: \"Invalid or missing email - please refer to documentation\" \r",
+							"    },\r",
+							"\r",
+							"    // Test cases for \"password\"\r",
+							"    { \r",
+							"        input: { \"firstname\": \"John\", \"lastname\": \"Doe\", \"email\": \"john.doe@test.com\", \"password\": \"\", \"username\": \"johndoe\", \"phone\": \"123-456-7890\" }, \r",
+							"        expectedMessage: \"Invalid or missing password - please refer to documentation\" \r",
+							"    },\r",
+							"    { \r",
+							"        input: { \"firstname\": \"John\", \"lastname\": \"Doe\", \"email\": \"john.doe@test.com\", \"password\": null, \"username\": \"johndoe\", \"phone\": \"123-456-7890\" }, \r",
+							"        expectedMessage: \"Invalid or missing password - please refer to documentation\" \r",
+							"    },\r",
+							"    { \r",
+							"        input: { \"firstname\": \"John\", \"lastname\": \"Doe\", \"email\": \"john.doe@test.com\", \"password\": \"short\", \"username\": \"johndoe\", \"phone\": \"123-456-7890\" }, \r",
+							"        expectedMessage: \"Invalid or missing password - please refer to documentation\" \r",
+							"    },\r",
+							"\r",
+							"    // Test cases for \"username\"\r",
+							"    { \r",
+							"        input: { \"firstname\": \"John\", \"lastname\": \"Doe\", \"email\": \"john.doe@test.com\", \"password\": \"Password123\", \"username\": \"\", \"phone\": \"123-456-7890\" }, \r",
+							"        expectedMessage: \"Invalid or missing username - please refer to documentation\" \r",
+							"    },\r",
+							"    { \r",
+							"        input: { \"firstname\": \"John\", \"lastname\": \"Doe\", \"email\": \"john.doe@test.com\", \"password\": \"Password123\", \"username\": null, \"phone\": \"123-456-7890\" }, \r",
+							"        expectedMessage: \"Invalid or missing username - please refer to documentation\" \r",
+							"    },\r",
+							"    { \r",
+							"        input: { \"firstname\": \"John\", \"lastname\": \"Doe\", \"email\": \"john.doe@test.com\", \"password\": \"Password123\", \"username\": \"!@#$\", \"phone\": \"123-456-7890\" }, \r",
+							"        expectedMessage: \"Invalid or missing username - please refer to documentation\" \r",
+							"    },\r",
+							"\r",
+							"    // Test cases for \"phone\"\r",
+							"    { \r",
+							"        input: { \"firstname\": \"John\", \"lastname\": \"Doe\", \"email\": \"john.doe@test.com\", \"password\": \"Password123\", \"username\": \"johndoe\", \"phone\": \"\" }, \r",
+							"        expectedMessage: \"Invalid or missing phone number - please refer to documentation\" \r",
+							"    },\r",
+							"    { \r",
+							"        input: { \"firstname\": \"John\", \"lastname\": \"Doe\", \"email\": \"john.doe@test.com\", \"password\": \"Password123\", \"username\": \"johndoe\", \"phone\": null }, \r",
+							"        expectedMessage: \"Invalid or missing phone number - please refer to documentation\" \r",
+							"    },\r",
+							"    { \r",
+							"        input: { \"firstname\": \"John\", \"lastname\": \"Doe\", \"email\": \"john.doe@test.com\", \"password\": \"Password123\", \"username\": \"johndoe\", \"phone\": \"abcde\" }, \r",
+							"        expectedMessage: \"Invalid or missing phone number - please refer to documentation\" \r",
+							"    }\r",
+							"];\r",
+							"\r",
+							"if (pm.environment.get(\"currentIndex\") === undefined) {\r",
+							"    pm.environment.set(\"testCases\", JSON.stringify(testCases));\r",
+							"    pm.environment.set(\"currentIndex\", 0);\r",
+							"    const currentCase = testCases[0];\r",
+							"    const body = JSON.stringify(currentCase.input)\r",
+							"    pm.variables.set(\"body\", body);\r",
+							"} else {\r",
+							"    const index = parseInt(pm.environment.get(\"currentIndex\"))\r",
+							"    const currentCase = testCases[index]\r",
+							"    const body = JSON.stringify(currentCase.input)\r",
+							"    pm.variables.set(\"body\", body)\r",
+							"}\r",
+							"\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"\r",
+							"// extract testCases and index\r",
+							"let index = parseInt(pm.environment.get(\"currentIndex\"));\r",
+							"const testCases = JSON.parse(pm.environment.get(\"testCases\")); \r",
+							"\r",
+							"// set current case, and increment index\r",
+							"const currentCase = testCases[index];\r",
+							"index = index + 1\r",
+							"\r",
+							"// if index within bounds\r",
+							"if (index < testCases.length) {\r",
+							"    console.log(\"----DEBUG----\")\r",
+							"    console.log(testCases.length)\r",
+							"    console.log(index)\r",
+							"    console.log(\"----DEBUG----\")\r",
+							"    // increment environment variable\r",
+							"    pm.environment.set(\"currentIndex\", index);\r",
+							"    // extract next test case\r",
+							"    const nextCase = testCases[index];\r",
+							"    // set request body to next test case\r",
+							"    let body = JSON.stringify(nextCase.input)\r",
+							"    pm.environment.set(\"body\", body);\r",
+							"    console.log(\"DEBUG INDEX -\" + index)\r",
+							"    console.log(\"DEBUG BODY -\" + pm.request.body)\r",
+							"    // set next request to be this request (with new body)\r",
+							"    pm.execution.setNextRequest(pm.info.requestName);\r",
+							"} else {\r",
+							"    // else, clear environment variables\r",
+							"    pm.environment.unset(\"testCases\");\r",
+							"    pm.environment.unset(\"currentIndex\");\r",
+							"}\r",
+							"\r",
+							"pm.test(\"Validate status\", function () {\r",
+							"    pm.response.to.have.status(400);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Validate error message\", function () {\r",
+							"    const body = pm.response.json();\r",
+							"    pm.expect(body).to.have.ownProperty(\"message\");\r",
+							"    pm.expect(body.message).to.be.a(\"String\")\r",
+							"    pm.expect(body.message).to.equal(currentCase.expectedMessage);\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disabledSystemHeaders": {
+					"accept": true
+				}
+			},
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{{body}}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:4000/register",
+					"host": [
+						"localhost"
+					],
+					"port": "4000",
+					"path": [
+						"register"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Login 400 Errors",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"const testCases = [\r",
+							"    // missing parameters\r",
+							"    { \r",
+							"        input: {\"password\": \"Password123\"}, \r",
+							"        expectedMessage: \"Missing username - please refer to documentation\"\r",
+							"    },\r",
+							"        // missing parameters\r",
+							"    { \r",
+							"        input: {\"username\": \"jacob15\"}, \r",
+							"        expectedMessage: \"Missing password - please refer to documentation\"\r",
+							"    },\r",
+							"        // user does not exist\r",
+							"    { \r",
+							"        input: {\"username\": \"jacob15\", \"password\": \"Password123\"}, \r",
+							"        expectedMessage: \"Invalid Credentials\"\r",
+							"    }\r",
+							"];\r",
+							"\r",
+							"if (pm.environment.get(\"currentIndex\") === undefined) {\r",
+							"    pm.environment.set(\"testCases\", JSON.stringify(testCases));\r",
+							"    pm.environment.set(\"currentIndex\", 0);\r",
+							"    const currentCase = testCases[0];\r",
+							"    const body = JSON.stringify(currentCase.input)\r",
+							"    pm.variables.set(\"body\", body);\r",
+							"} else {\r",
+							"    const index = parseInt(pm.environment.get(\"currentIndex\"))\r",
+							"    const currentCase = testCases[index]\r",
+							"    const body = JSON.stringify(currentCase.input)\r",
+							"    pm.variables.set(\"body\", body)\r",
+							"}\r",
+							"\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"\r",
+							"// extract testCases and index\r",
+							"let index = parseInt(pm.environment.get(\"currentIndex\"));\r",
+							"const testCases = JSON.parse(pm.environment.get(\"testCases\")); \r",
+							"\r",
+							"// set current case, and increment index\r",
+							"const currentCase = testCases[index];\r",
+							"index = index + 1\r",
+							"\r",
+							"// if index within bounds\r",
+							"if (index < testCases.length) {\r",
+							"    console.log(\"----DEBUG----\")\r",
+							"    console.log(testCases.length)\r",
+							"    console.log(index)\r",
+							"    console.log(\"----DEBUG----\")\r",
+							"    // increment environment variable\r",
+							"    pm.environment.set(\"currentIndex\", index);\r",
+							"    // extract next test case\r",
+							"    const nextCase = testCases[index];\r",
+							"    // set request body to next test case\r",
+							"    let body = JSON.stringify(nextCase.input)\r",
+							"    pm.environment.set(\"body\", body);\r",
+							"    console.log(\"DEBUG INDEX -\" + index)\r",
+							"    console.log(\"DEBUG BODY -\" + pm.request.body)\r",
+							"    // set next request to be this request (with new body)\r",
+							"    pm.execution.setNextRequest(pm.info.requestName);\r",
+							"} else {\r",
+							"    // else, clear environment variables\r",
+							"    pm.environment.unset(\"testCases\");\r",
+							"    pm.environment.unset(\"currentIndex\");\r",
+							"}\r",
+							"\r",
+							"if (currentCase.expectedMessage.includes(\"not found\")) {\r",
+							"    pm.test(\"Validate status\", function () {\r",
+							"    pm.response.to.have.status(404);\r",
+							"    });\r",
+							"} else {\r",
+							"    pm.test(\"Validate status\", function () {\r",
+							"        pm.response.to.have.status(400);\r",
+							"    });\r",
+							"}\r",
+							"\r",
+							"pm.test(\"Validate error message\", function () {\r",
+							"    const body = pm.response.json();\r",
+							"    pm.expect(body).to.have.ownProperty(\"message\");\r",
+							"    pm.expect(body.message).to.be.a(\"String\")\r",
+							"    pm.expect(body.message).to.equal(currentCase.expectedMessage);\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{{body}}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:4000/login",
+					"host": [
+						"localhost"
+					],
+					"port": "4000",
+					"path": [
+						"login"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

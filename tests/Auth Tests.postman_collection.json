@@ -1,0 +1,467 @@
+{
+	"info": {
+		"_postman_id": "a17c7348-7cfe-4791-8927-9fd8bcd53a31",
+		"name": "Auth Tests",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "39610924",
+		"_collection_link": "https://team00-5537.postman.co/workspace/460-Testing~ea29f3ac-e6c6-47cf-bff3-dd128dc298a9/collection/38937033-a17c7348-7cfe-4791-8927-9fd8bcd53a31?action=share&source=collection_link&creator=39610924"
+	},
+	"item": [
+		{
+			"name": "Register Rand User",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"    pm.collectionVariables.set(\"firstname\", pm.variables.replaceIn('{{$randomFirstName}}'))\r",
+							"    pm.collectionVariables.set(\"lastname\", pm.variables.replaceIn('{{$randomLastName}}'))\r",
+							"    pm.collectionVariables.set(\"email\", pm.variables.replaceIn('{{$randomEmail}}'))\r",
+							"    pm.collectionVariables.set(\"password\", pm.variables.replaceIn('{{$randomPassword}}'))\r",
+							"    pm.collectionVariables.set(\"username\", pm.variables.replaceIn('{{$randomUserName}}'))\r",
+							"    pm.collectionVariables.set(\"phone\", pm.variables.replaceIn('{{$randomPhoneNumber}}'))\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"An access token is returned\", () => {\r",
+							"    const body = pm.response.json();\r",
+							"    pm.expect(body).to.have.ownProperty('accessToken');\r",
+							"    pm.expect(body.accessToken).to.be.a('string');\r",
+							"    pm.collectionVariables.set('token', body.accessToken);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Validate status\", () => {\r",
+							"    pm.response.to.have.status(201);\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"firstname\":\"{{firstname}}\",\r\n    \"lastname\":\"{{lastname}}\",\r\n    \"email\":\"{{email}}\",\r\n    \"password\":\"{{password}}\",\r\n    \"username\":\"{{username}}\",\r\n    \"phone\":\"{{phone}}\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:4000/register",
+					"host": [
+						"localhost"
+					],
+					"port": "4000",
+					"path": [
+						"register"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Login Rand User",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const body = pm.response.json();\r",
+							"\r",
+							"pm.test(\"An access token is returned\", () => {\r",
+							"    pm.expect(body).to.have.property('accessToken')\r",
+							"    pm.expect(body.accessToken).to.be.a('string')\r",
+							"})\r",
+							"\r",
+							"pm.test(\"Email is returned\", () => {\r",
+							"    pm.expect(body.user).to.have.property('email')\r",
+							"    pm.expect(body.user.email).to.be.a('string')\r",
+							"    pm.expect(body.user.email).to.be.equal(pm.collectionVariables.get(\"email\"))\r",
+							"})\r",
+							"\r",
+							"pm.test(\"First name is returned\", () => {\r",
+							"    pm.expect(body.user).to.have.property('name')\r",
+							"    pm.expect(body.user.name).to.be.a('string')\r",
+							"    pm.expect(body.user.name).to.be.equal(pm.collectionVariables.get(\"firstname\"))\r",
+							"})\r",
+							"\r",
+							"pm.test(\"Validate status\", () => {\r",
+							"    pm.response.to.have.status(200)\r",
+							"})"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"username\":\"{{username}}\",\r\n    \"password\":\"{{password}}\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:4000/login",
+					"host": [
+						"localhost"
+					],
+					"port": "4000",
+					"path": [
+						"login"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Test Rand User Token",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Message string is returned\", () => {\r",
+							"    const body = pm.response.json();\r",
+							"    pm.expect(body).to.have.property('message')\r",
+							"    pm.expect(body.message).to.be.a('string')\r",
+							"    pm.expect(body.message).to.equal(\"Your token is valid and your role is: undefined\")\r",
+							"})\r",
+							"\r",
+							"pm.test(\"Validate status\", () => {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:4000/jwt_test",
+					"host": [
+						"localhost"
+					],
+					"port": "4000",
+					"path": [
+						"jwt_test"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Invalid Credentials",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Validate error message\", function () {\r",
+							"    const body = pm.response.json();\r",
+							"    pm.expect(body).to.have.property('message')\r",
+							"    pm.expect(body.message).to.be.a('string')\r",
+							"    pm.expect(body.message).to.equal(\"Invalid Credentials\")\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Validate status\", () => {\r",
+							"    pm.response.to.have.status(400)\r",
+							"})"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"username\":\"{{username}}\",\r\n    \"password\":\"invalidpassword123\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:4000/login",
+					"host": [
+						"localhost"
+					],
+					"port": "4000",
+					"path": [
+						"login"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Register Same Username",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Validate error message\", function () {\r",
+							"    const body = pm.response.json();\r",
+							"    pm.expect(body).to.have.property('message')\r",
+							"    pm.expect(body.message).to.be.a('string')\r",
+							"    pm.expect(body.message).to.equal(\"Username exists\")\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Validate status\", () => {\r",
+							"    pm.response.to.have.status(400)\r",
+							"})  "
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"firstname\":\"{{firstname}}\",\r\n    \"lastname\":\"{{lastname}}\",\r\n    \"email\":\"{{$randomEmail}}\",\r\n    \"password\":\"{{password}}\",\r\n    \"username\":\"{{username}}\",\r\n    \"phone\":\"{{phone}}\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:4000/register",
+					"host": [
+						"localhost"
+					],
+					"port": "4000",
+					"path": [
+						"register"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Register Same Email",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Validate error message\", function () {\r",
+							"    const body = pm.response.json();\r",
+							"    pm.expect(body).to.have.property('message')\r",
+							"    pm.expect(body.message).to.be.a('string')\r",
+							"    pm.expect(body.message).to.equal(\"Email exists\")\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Validate status\", () => {\r",
+							"    pm.response.to.have.status(400)\r",
+							"})  "
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"firstname\":\"{{firstname}}\",\r\n    \"lastname\":\"{{lastname}}\",\r\n    \"email\":\"{{email}}\",\r\n    \"password\":\"{{password}}\",\r\n    \"username\":\"{{$randomUserName}}\",\r\n    \"phone\":\"{{phone}}\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:4000/register",
+					"host": [
+						"localhost"
+					],
+					"port": "4000",
+					"path": [
+						"register"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Change Password",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"    pm.collectionVariables.set(\"newPassword\", pm.variables.replaceIn('{{$randomPassword}}'))"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Validate response message\", () => {\r",
+							"    const body = pm.response.json();\r",
+							"    pm.expect(body).to.have.property('message')\r",
+							"    pm.expect(body.message).to.be.a('string')\r",
+							"    pm.expect(body.message).to.equal(\"Successfully changed password for \" + pm.collectionVariables.get(\"username\") + \"!\")\r",
+							"})\r",
+							"\r",
+							"pm.test(\"Validate status\", () => {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"username\":\"{{username}}\",\r\n    \"oldPassword\":\"{{password}}\",\r\n    \"newPassword\":\"{{newPassword}}\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:4000/change-password",
+					"host": [
+						"localhost"
+					],
+					"port": "4000",
+					"path": [
+						"change-password"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"variable": [
+		{
+			"key": "firstname",
+			"value": ""
+		},
+		{
+			"key": "lastname",
+			"value": ""
+		},
+		{
+			"key": "email",
+			"value": ""
+		},
+		{
+			"key": "password",
+			"value": ""
+		},
+		{
+			"key": "username",
+			"value": ""
+		},
+		{
+			"key": "phone",
+			"value": ""
+		},
+		{
+			"key": "token",
+			"value": ""
+		},
+		{
+			"key": "id",
+			"value": ""
+		},
+		{
+			"key": "role",
+			"value": ""
+		},
+		{
+			"key": "newPassword",
+			"value": ""
+		}
+	]
+}

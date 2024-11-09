@@ -1,0 +1,1937 @@
+{
+	"info": {
+		"_postman_id": "7f3ca6dd-d07b-443c-b0fc-5cffebb6a689",
+		"name": "Closed Routes",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "39610924",
+		"_collection_link": "https://team00-5537.postman.co/workspace/460-Testing~ea29f3ac-e6c6-47cf-bff3-dd128dc298a9/collection/38937033-7f3ca6dd-d07b-443c-b0fc-5cffebb6a689?action=share&source=collection_link&creator=39610924"
+	},
+	"item": [
+		{
+			"name": "Register for Token",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"    pm.collectionVariables.set(\"firstname\", pm.variables.replaceIn('{{$randomFirstName}}'))\r",
+							"    pm.collectionVariables.set(\"lastname\", pm.variables.replaceIn('{{$randomLastName}}'))\r",
+							"    pm.collectionVariables.set(\"email\", pm.variables.replaceIn('{{$randomEmail}}'))\r",
+							"    pm.collectionVariables.set(\"password\", pm.variables.replaceIn('{{$randomPassword}}'))\r",
+							"    pm.collectionVariables.set(\"username\", pm.variables.replaceIn('{{$randomUserName}}'))\r",
+							"    pm.collectionVariables.set(\"phone\", pm.variables.replaceIn('{{$randomPhoneNumber}}'))\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"An access token is returned\", () => {\r",
+							"    pm.expect(pm.response.json()).to.have.property('accessToken')\r",
+							"    pm.expect(pm.response.json().accessToken).to.be.a('string')\r",
+							"    pm.collectionVariables.set('token', pm.response.json().accessToken)\r",
+							"})\r",
+							"\r",
+							"pm.test(\"Validate status\", () => {\r",
+							"    pm.response.to.have.status(201)\r",
+							"})\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"firstname\":\"{{firstname}}\",\r\n    \"lastname\":\"{{lastname}}\",\r\n    \"email\":\"{{email}}\",\r\n    \"password\":\"{{password}}\",\r\n    \"username\":\"{{username}}\",\r\n    \"role\":\"1\",\r\n    \"phone\":\"{{phone}}\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:4000/register",
+					"host": [
+						"localhost"
+					],
+					"port": "4000",
+					"path": [
+						"register"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Add Test Book",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"    pm.collectionVariables.set(\"isbn13\", 9780140449136)\r",
+							"    pm.collectionVariables.set(\"author\", \"TestFyodor Dostoyevsky\")\r",
+							"    pm.collectionVariables.set(\"publication\", 2002)\r",
+							"    pm.collectionVariables.set(\"orginal_title\", \"the original title\")\r",
+							"    pm.collectionVariables.set(\"title\", \"Crime and Punishment test\")\r",
+							"\r",
+							"    pm.collectionVariables.set(\"average\", 3.1415)\r",
+							"    pm.collectionVariables.set(\"count\", 500)\r",
+							"    pm.collectionVariables.set(\"rating1\", 100)\r",
+							"    pm.collectionVariables.set(\"rating2\", 100)\r",
+							"    pm.collectionVariables.set(\"rating3\", 100)\r",
+							"    pm.collectionVariables.set(\"rating4\", 100)\r",
+							"    pm.collectionVariables.set(\"rating5\", 100)\r",
+							"\r",
+							"    pm.collectionVariables.set(\"large\", \"http://books.google.com/books/content?id=1YOMEAAAQBAJ&printsec=frontcover&img=1&zoom=1&source=gbs_api\")\r",
+							"    pm.collectionVariables.set(\"small\", \"http://books.google.com/books/content?id=1YOMEAAAQBAJ&printsec=frontcover&img=1&zoom=5&source=gbs_api\")\r",
+							"\r",
+							"\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Validate message\", () => {\r",
+							"    const body = pm.response.json();\r",
+							"    pm.expect(body).to.have.property('message')\r",
+							"    pm.expect(body.message).to.be.a('string')\r",
+							"    pm.expect(body.message).to.equal(\"Book successfully added.\")\r",
+							"})\r",
+							"\r",
+							"pm.test(\"Validate status\", () => {\r",
+							"    pm.response.to.have.status(201)\r",
+							"})\r",
+							"\r",
+							"pm.collectionVariables.set('addRequest', pm.request)\r",
+							"pm.collectionVariables.set('addBody', pm.response.json())"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"entry\": {\r\n        \"isbn13\": {{isbn13}},\r\n        \"authors\": \"{{author}}\",\r\n        \"publication\": {{publication}},\r\n        \"original_title\": \"{{orginal_title}}\",\r\n        \"title\": \"{{title}}\",\r\n        \"ratings\": {\r\n            \"average\": {{average}},\r\n            \"count\": {{count}},\r\n            \"rating1\": {{rating1}},\r\n            \"rating2\": {{rating2}},\r\n            \"rating3\": {{rating3}},\r\n            \"rating4\": {{rating4}},\r\n            \"rating5\": {{rating5}}\r\n        },\r\n        \"icons\": {\r\n            \"large\": \"{{large}}\",\r\n            \"small\": \"{{small}}\"\r\n        }\r\n    }\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:4000/books",
+					"host": [
+						"localhost"
+					],
+					"port": "4000",
+					"path": [
+						"books"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Request by ISBN (Test Book)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"\r",
+							"const theEntry = pm.response.json().result;\r",
+							"\r",
+							"pm.test(\"Validate isbn13\", () => {\r",
+							"    pm.expect(theEntry).to.have.property('isbn13')\r",
+							"    pm.expect(theEntry.isbn13).to.be.a('Number')\r",
+							"    pm.expect(theEntry.isbn13).to.equal(pm.collectionVariables.get(\"isbn13\"))\r",
+							"})\r",
+							"\r",
+							"pm.test(\"Validate authors\", () => {\r",
+							"    pm.expect(theEntry).to.have.property('authors')\r",
+							"    pm.expect(theEntry.authors).to.be.a('String')\r",
+							"    pm.expect(theEntry.authors).to.equal(pm.collectionVariables.get(\"author\"))\r",
+							"})\r",
+							"\r",
+							"pm.test(\"Validate publication year\", () => {\r",
+							"    pm.expect(theEntry).to.have.property('publication')\r",
+							"    pm.expect(theEntry.publication).to.be.a('Number')\r",
+							"    pm.expect(theEntry.publication).to.equal(pm.collectionVariables.get(\"publication\"))\r",
+							"})\r",
+							"\r",
+							"pm.test(\"Validate original title\", () => {\r",
+							"    pm.expect(theEntry).to.have.property('original_title')\r",
+							"    pm.expect(theEntry.original_title).to.be.a('String')\r",
+							"    pm.expect(theEntry.original_title).to.equal(pm.collectionVariables.get(\"orginal_title\"))\r",
+							"})\r",
+							"\r",
+							"pm.test(\"Validate title\", () => {\r",
+							"    pm.expect(theEntry).to.have.property('title')\r",
+							"    pm.expect(theEntry.title).to.be.a('String')\r",
+							"    pm.expect(theEntry.title).to.equal(pm.collectionVariables.get(\"title\"))\r",
+							"})\r",
+							"\r",
+							"pm.test(\"Validate rating average\", () => {\r",
+							"    pm.expect(theEntry.ratings).to.have.property('average')\r",
+							"    pm.expect(theEntry.ratings.average).to.be.a('Number')\r",
+							"    pm.expect(theEntry.ratings.average).to.equal(pm.collectionVariables.get(\"average\"))\r",
+							"})\r",
+							"\r",
+							"pm.test(\"Validate rating count\", () => {\r",
+							"    pm.expect(theEntry.ratings).to.have.property('count')\r",
+							"    pm.expect(theEntry.ratings.count).to.be.a('Number')\r",
+							"    pm.expect(theEntry.ratings.count).to.equal(pm.collectionVariables.get(\"count\"))\r",
+							"})\r",
+							"\r",
+							"pm.test(\"Validate rating 1 star\", () => {\r",
+							"    pm.expect(theEntry.ratings).to.have.property('rating_1')\r",
+							"    pm.expect(theEntry.ratings.rating_1).to.be.a('Number')\r",
+							"    pm.expect(theEntry.ratings.rating_1).to.equal(pm.collectionVariables.get(\"rating1\"))\r",
+							"})\r",
+							"\r",
+							"pm.test(\"Validate rating 2 star\", () => {\r",
+							"    pm.expect(theEntry.ratings).to.have.property('rating_2')\r",
+							"    pm.expect(theEntry.ratings.rating_2).to.be.a('Number')\r",
+							"    pm.expect(theEntry.ratings.rating_2).to.equal(pm.collectionVariables.get(\"rating2\"))\r",
+							"})\r",
+							"\r",
+							"pm.test(\"Validate rating 3 star\", () => {\r",
+							"    pm.expect(theEntry.ratings).to.have.property('rating_3')\r",
+							"    pm.expect(theEntry.ratings.rating_3).to.be.a('Number')\r",
+							"    pm.expect(theEntry.ratings.rating_3).to.equal(pm.collectionVariables.get(\"rating3\"))\r",
+							"})\r",
+							"\r",
+							"pm.test(\"Validate rating 4 star\", () => {\r",
+							"    pm.expect(theEntry.ratings).to.have.property('rating_4')\r",
+							"    pm.expect(theEntry.ratings.rating_4).to.be.a('Number')\r",
+							"    pm.expect(theEntry.ratings.rating_4).to.equal(pm.collectionVariables.get(\"rating4\"))\r",
+							"})\r",
+							"\r",
+							"pm.test(\"Validate rating 5 star\", () => {\r",
+							"    pm.expect(theEntry.ratings).to.have.property('rating_5')\r",
+							"    pm.expect(theEntry.ratings.rating_5).to.be.a('Number')\r",
+							"    pm.expect(theEntry.ratings.rating_5).to.equal(pm.collectionVariables.get(\"rating5\"))\r",
+							"})\r",
+							"\r",
+							"\r",
+							"pm.test(\"Validate large img url\", () => {\r",
+							"    pm.expect(theEntry.icons).to.have.property('large')\r",
+							"    pm.expect(theEntry.icons.large).to.be.a('String')\r",
+							"    pm.expect(theEntry.icons.large).to.equal(pm.collectionVariables.get(\"large\"))\r",
+							"})\r",
+							"\r",
+							"pm.test(\"Validate small img url\", () => {\r",
+							"    pm.expect(theEntry.icons).to.have.property('small')\r",
+							"    pm.expect(theEntry.icons.small).to.be.a('String')\r",
+							"    pm.expect(theEntry.icons.small).to.equal(pm.collectionVariables.get(\"small\"))\r",
+							"})\r",
+							"\r",
+							"pm.test(\"Validate status\", () => {\r",
+							"    pm.response.to.have.status(200)\r",
+							"})"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:4000/books/isbns/{{isbn13}}",
+					"host": [
+						"localhost"
+					],
+					"port": "4000",
+					"path": [
+						"books",
+						"isbns",
+						"{{isbn13}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Request by Title (Test Book)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"\r",
+							"const theEntry = pm.response.json().results[0];\r",
+							"\r",
+							"pm.test(\"Validate isbn13\", () => {\r",
+							"    pm.expect(theEntry).to.have.property('isbn13')\r",
+							"    pm.expect(theEntry.isbn13).to.be.a('Number')\r",
+							"    pm.expect(theEntry.isbn13).to.equal(pm.collectionVariables.get(\"isbn13\"))\r",
+							"})\r",
+							"\r",
+							"pm.test(\"Validate authors\", () => {\r",
+							"    pm.expect(theEntry).to.have.property('authors')\r",
+							"    pm.expect(theEntry.authors).to.be.a('String')\r",
+							"    pm.expect(theEntry.authors).to.equal(pm.collectionVariables.get(\"author\"))\r",
+							"})\r",
+							"\r",
+							"pm.test(\"Validate publication year\", () => {\r",
+							"    pm.expect(theEntry).to.have.property('publication')\r",
+							"    pm.expect(theEntry.publication).to.be.a('Number')\r",
+							"    pm.expect(theEntry.publication).to.equal(pm.collectionVariables.get(\"publication\"))\r",
+							"})\r",
+							"\r",
+							"pm.test(\"Validate original title\", () => {\r",
+							"    pm.expect(theEntry).to.have.property('original_title')\r",
+							"    pm.expect(theEntry.original_title).to.be.a('String')\r",
+							"    pm.expect(theEntry.original_title).to.equal(pm.collectionVariables.get(\"orginal_title\"))\r",
+							"})\r",
+							"\r",
+							"pm.test(\"Validate title\", () => {\r",
+							"    pm.expect(theEntry).to.have.property('title')\r",
+							"    pm.expect(theEntry.title).to.be.a('String')\r",
+							"    pm.expect(theEntry.title).to.equal(pm.collectionVariables.get(\"title\"))\r",
+							"})\r",
+							"\r",
+							"pm.test(\"Validate rating average\", () => {\r",
+							"    pm.expect(theEntry.ratings).to.have.property('average')\r",
+							"    pm.expect(theEntry.ratings.average).to.be.a('Number')\r",
+							"    pm.expect(theEntry.ratings.average).to.equal(pm.collectionVariables.get(\"average\"))\r",
+							"})\r",
+							"\r",
+							"pm.test(\"Validate rating count\", () => {\r",
+							"    pm.expect(theEntry.ratings).to.have.property('count')\r",
+							"    pm.expect(theEntry.ratings.count).to.be.a('Number')\r",
+							"    pm.expect(theEntry.ratings.count).to.equal(pm.collectionVariables.get(\"count\"))\r",
+							"})\r",
+							"\r",
+							"pm.test(\"Validate rating 1 star\", () => {\r",
+							"    pm.expect(theEntry.ratings).to.have.property('rating_1')\r",
+							"    pm.expect(theEntry.ratings.rating_1).to.be.a('Number')\r",
+							"    pm.expect(theEntry.ratings.rating_1).to.equal(pm.collectionVariables.get(\"rating1\"))\r",
+							"})\r",
+							"\r",
+							"pm.test(\"Validate rating 2 star\", () => {\r",
+							"    pm.expect(theEntry.ratings).to.have.property('rating_2')\r",
+							"    pm.expect(theEntry.ratings.rating_2).to.be.a('Number')\r",
+							"    pm.expect(theEntry.ratings.rating_2).to.equal(pm.collectionVariables.get(\"rating2\"))\r",
+							"})\r",
+							"\r",
+							"pm.test(\"Validate rating 3 star\", () => {\r",
+							"    pm.expect(theEntry.ratings).to.have.property('rating_3')\r",
+							"    pm.expect(theEntry.ratings.rating_3).to.be.a('Number')\r",
+							"    pm.expect(theEntry.ratings.rating_3).to.equal(pm.collectionVariables.get(\"rating3\"))\r",
+							"})\r",
+							"\r",
+							"pm.test(\"Validate rating 4 star\", () => {\r",
+							"    pm.expect(theEntry.ratings).to.have.property('rating_4')\r",
+							"    pm.expect(theEntry.ratings.rating_4).to.be.a('Number')\r",
+							"    pm.expect(theEntry.ratings.rating_4).to.equal(pm.collectionVariables.get(\"rating4\"))\r",
+							"})\r",
+							"\r",
+							"pm.test(\"Validate rating 5 star\", () => {\r",
+							"    pm.expect(theEntry.ratings).to.have.property('rating_5')\r",
+							"    pm.expect(theEntry.ratings.rating_5).to.be.a('Number')\r",
+							"    pm.expect(theEntry.ratings.rating_5).to.equal(pm.collectionVariables.get(\"rating5\"))\r",
+							"})\r",
+							"\r",
+							"\r",
+							"pm.test(\"Validate large img url\", () => {\r",
+							"    pm.expect(theEntry.icons).to.have.property('large')\r",
+							"    pm.expect(theEntry.icons.large).to.be.a('String')\r",
+							"    pm.expect(theEntry.icons.large).to.equal(pm.collectionVariables.get(\"large\"))\r",
+							"})\r",
+							"\r",
+							"pm.test(\"Validate small img url\", () => {\r",
+							"    pm.expect(theEntry.icons).to.have.property('small')\r",
+							"    pm.expect(theEntry.icons.small).to.be.a('String')\r",
+							"    pm.expect(theEntry.icons.small).to.equal(pm.collectionVariables.get(\"small\"))\r",
+							"})\r",
+							"\r",
+							"pm.test(\"Validate status\", () => {\r",
+							"    pm.response.to.have.status(200)\r",
+							"})"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:4000/books/title/{{title}}",
+					"host": [
+						"localhost"
+					],
+					"port": "4000",
+					"path": [
+						"books",
+						"title",
+						"{{title}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Request by Author (Test Book)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"\r",
+							"const theEntry = pm.response.json().results[0];\r",
+							"\r",
+							"pm.test(\"Validate isbn13\", () => {\r",
+							"    pm.expect(theEntry).to.have.property('isbn13')\r",
+							"    pm.expect(theEntry.isbn13).to.be.a('Number')\r",
+							"    pm.expect(theEntry.isbn13).to.equal(pm.collectionVariables.get(\"isbn13\"))\r",
+							"})\r",
+							"\r",
+							"pm.test(\"Validate authors\", () => {\r",
+							"    pm.expect(theEntry).to.have.property('authors')\r",
+							"    pm.expect(theEntry.authors).to.be.a('String')\r",
+							"    pm.expect(theEntry.authors).to.equal(pm.collectionVariables.get(\"author\"))\r",
+							"})\r",
+							"\r",
+							"pm.test(\"Validate publication year\", () => {\r",
+							"    pm.expect(theEntry).to.have.property('publication')\r",
+							"    pm.expect(theEntry.publication).to.be.a('Number')\r",
+							"    pm.expect(theEntry.publication).to.equal(pm.collectionVariables.get(\"publication\"))\r",
+							"})\r",
+							"\r",
+							"pm.test(\"Validate original title\", () => {\r",
+							"    pm.expect(theEntry).to.have.property('original_title')\r",
+							"    pm.expect(theEntry.original_title).to.be.a('String')\r",
+							"    pm.expect(theEntry.original_title).to.equal(pm.collectionVariables.get(\"orginal_title\"))\r",
+							"})\r",
+							"\r",
+							"pm.test(\"Validate title\", () => {\r",
+							"    pm.expect(theEntry).to.have.property('title')\r",
+							"    pm.expect(theEntry.title).to.be.a('String')\r",
+							"    pm.expect(theEntry.title).to.equal(pm.collectionVariables.get(\"title\"))\r",
+							"})\r",
+							"\r",
+							"pm.test(\"Validate rating average\", () => {\r",
+							"    pm.expect(theEntry.ratings).to.have.property('average')\r",
+							"    pm.expect(theEntry.ratings.average).to.be.a('Number')\r",
+							"    pm.expect(theEntry.ratings.average).to.equal(pm.collectionVariables.get(\"average\"))\r",
+							"})\r",
+							"\r",
+							"pm.test(\"Validate rating count\", () => {\r",
+							"    pm.expect(theEntry.ratings).to.have.property('count')\r",
+							"    pm.expect(theEntry.ratings.count).to.be.a('Number')\r",
+							"    pm.expect(theEntry.ratings.count).to.equal(pm.collectionVariables.get(\"count\"))\r",
+							"})\r",
+							"\r",
+							"pm.test(\"Validate rating 1 star\", () => {\r",
+							"    pm.expect(theEntry.ratings).to.have.property('rating_1')\r",
+							"    pm.expect(theEntry.ratings.rating_1).to.be.a('Number')\r",
+							"    pm.expect(theEntry.ratings.rating_1).to.equal(pm.collectionVariables.get(\"rating1\"))\r",
+							"})\r",
+							"\r",
+							"pm.test(\"Validate rating 2 star\", () => {\r",
+							"    pm.expect(theEntry.ratings).to.have.property('rating_2')\r",
+							"    pm.expect(theEntry.ratings.rating_2).to.be.a('Number')\r",
+							"    pm.expect(theEntry.ratings.rating_2).to.equal(pm.collectionVariables.get(\"rating2\"))\r",
+							"})\r",
+							"\r",
+							"pm.test(\"Validate rating 3 star\", () => {\r",
+							"    pm.expect(theEntry.ratings).to.have.property('rating_3')\r",
+							"    pm.expect(theEntry.ratings.rating_3).to.be.a('Number')\r",
+							"    pm.expect(theEntry.ratings.rating_3).to.equal(pm.collectionVariables.get(\"rating3\"))\r",
+							"})\r",
+							"\r",
+							"pm.test(\"Validate rating 4 star\", () => {\r",
+							"    pm.expect(theEntry.ratings).to.have.property('rating_4')\r",
+							"    pm.expect(theEntry.ratings.rating_4).to.be.a('Number')\r",
+							"    pm.expect(theEntry.ratings.rating_4).to.equal(pm.collectionVariables.get(\"rating4\"))\r",
+							"})\r",
+							"\r",
+							"pm.test(\"Validate rating 5 star\", () => {\r",
+							"    pm.expect(theEntry.ratings).to.have.property('rating_5')\r",
+							"    pm.expect(theEntry.ratings.rating_5).to.be.a('Number')\r",
+							"    pm.expect(theEntry.ratings.rating_5).to.equal(pm.collectionVariables.get(\"rating5\"))\r",
+							"})\r",
+							"\r",
+							"\r",
+							"pm.test(\"Validate large img url\", () => {\r",
+							"    pm.expect(theEntry.icons).to.have.property('large')\r",
+							"    pm.expect(theEntry.icons.large).to.be.a('String')\r",
+							"    pm.expect(theEntry.icons.large).to.equal(pm.collectionVariables.get(\"large\"))\r",
+							"})\r",
+							"\r",
+							"pm.test(\"Validate small img url\", () => {\r",
+							"    pm.expect(theEntry.icons).to.have.property('small')\r",
+							"    pm.expect(theEntry.icons.small).to.be.a('String')\r",
+							"    pm.expect(theEntry.icons.small).to.equal(pm.collectionVariables.get(\"small\"))\r",
+							"})\r",
+							"\r",
+							"pm.test(\"Validate status\", () => {\r",
+							"    pm.response.to.have.status(200)\r",
+							"})"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:4000/books/author/{{author}}",
+					"host": [
+						"localhost"
+					],
+					"port": "4000",
+					"path": [
+						"books",
+						"author",
+						"{{author}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Request by Rating tight bounds",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"\r",
+							"const theEntry = pm.response.json().results[0];\r",
+							"\r",
+							"pm.test(\"Validate isbn13\", () => {\r",
+							"    pm.expect(theEntry).to.have.property('isbn13')\r",
+							"    pm.expect(theEntry.isbn13).to.be.a('Number')\r",
+							"    pm.expect(theEntry.isbn13).to.equal(pm.collectionVariables.get(\"isbn13\"))\r",
+							"})\r",
+							"\r",
+							"pm.test(\"Validate authors\", () => {\r",
+							"    pm.expect(theEntry).to.have.property('authors')\r",
+							"    pm.expect(theEntry.authors).to.be.a('String')\r",
+							"    pm.expect(theEntry.authors).to.equal(pm.collectionVariables.get(\"author\"))\r",
+							"})\r",
+							"\r",
+							"pm.test(\"Validate publication year\", () => {\r",
+							"    pm.expect(theEntry).to.have.property('publication')\r",
+							"    pm.expect(theEntry.publication).to.be.a('Number')\r",
+							"    pm.expect(theEntry.publication).to.equal(pm.collectionVariables.get(\"publication\"))\r",
+							"})\r",
+							"\r",
+							"pm.test(\"Validate original title\", () => {\r",
+							"    pm.expect(theEntry).to.have.property('original_title')\r",
+							"    pm.expect(theEntry.original_title).to.be.a('String')\r",
+							"    pm.expect(theEntry.original_title).to.equal(pm.collectionVariables.get(\"orginal_title\"))\r",
+							"})\r",
+							"\r",
+							"pm.test(\"Validate title\", () => {\r",
+							"    pm.expect(theEntry).to.have.property('title')\r",
+							"    pm.expect(theEntry.title).to.be.a('String')\r",
+							"    pm.expect(theEntry.title).to.equal(pm.collectionVariables.get(\"title\"))\r",
+							"})\r",
+							"\r",
+							"pm.test(\"Validate rating average\", () => {\r",
+							"    pm.expect(theEntry.ratings).to.have.property('average')\r",
+							"    pm.expect(theEntry.ratings.average).to.be.a('Number')\r",
+							"    pm.expect(theEntry.ratings.average).to.equal(pm.collectionVariables.get(\"average\"))\r",
+							"})\r",
+							"\r",
+							"pm.test(\"Validate rating count\", () => {\r",
+							"    pm.expect(theEntry.ratings).to.have.property('count')\r",
+							"    pm.expect(theEntry.ratings.count).to.be.a('Number')\r",
+							"    pm.expect(theEntry.ratings.count).to.equal(pm.collectionVariables.get(\"count\"))\r",
+							"})\r",
+							"\r",
+							"pm.test(\"Validate rating 1 star\", () => {\r",
+							"    pm.expect(theEntry.ratings).to.have.property('rating_1')\r",
+							"    pm.expect(theEntry.ratings.rating_1).to.be.a('Number')\r",
+							"    pm.expect(theEntry.ratings.rating_1).to.equal(pm.collectionVariables.get(\"rating1\"))\r",
+							"})\r",
+							"\r",
+							"pm.test(\"Validate rating 2 star\", () => {\r",
+							"    pm.expect(theEntry.ratings).to.have.property('rating_2')\r",
+							"    pm.expect(theEntry.ratings.rating_2).to.be.a('Number')\r",
+							"    pm.expect(theEntry.ratings.rating_2).to.equal(pm.collectionVariables.get(\"rating2\"))\r",
+							"})\r",
+							"\r",
+							"pm.test(\"Validate rating 3 star\", () => {\r",
+							"    pm.expect(theEntry.ratings).to.have.property('rating_3')\r",
+							"    pm.expect(theEntry.ratings.rating_3).to.be.a('Number')\r",
+							"    pm.expect(theEntry.ratings.rating_3).to.equal(pm.collectionVariables.get(\"rating3\"))\r",
+							"})\r",
+							"\r",
+							"pm.test(\"Validate rating 4 star\", () => {\r",
+							"    pm.expect(theEntry.ratings).to.have.property('rating_4')\r",
+							"    pm.expect(theEntry.ratings.rating_4).to.be.a('Number')\r",
+							"    pm.expect(theEntry.ratings.rating_4).to.equal(pm.collectionVariables.get(\"rating4\"))\r",
+							"})\r",
+							"\r",
+							"pm.test(\"Validate rating 5 star\", () => {\r",
+							"    pm.expect(theEntry.ratings).to.have.property('rating_5')\r",
+							"    pm.expect(theEntry.ratings.rating_5).to.be.a('Number')\r",
+							"    pm.expect(theEntry.ratings.rating_5).to.equal(pm.collectionVariables.get(\"rating5\"))\r",
+							"})\r",
+							"\r",
+							"\r",
+							"pm.test(\"Validate large img url\", () => {\r",
+							"    pm.expect(theEntry.icons).to.have.property('large')\r",
+							"    pm.expect(theEntry.icons.large).to.be.a('String')\r",
+							"    pm.expect(theEntry.icons.large).to.equal(pm.collectionVariables.get(\"large\"))\r",
+							"})\r",
+							"\r",
+							"pm.test(\"Validate small img url\", () => {\r",
+							"    pm.expect(theEntry.icons).to.have.property('small')\r",
+							"    pm.expect(theEntry.icons.small).to.be.a('String')\r",
+							"    pm.expect(theEntry.icons.small).to.equal(pm.collectionVariables.get(\"small\"))\r",
+							"})\r",
+							"\r",
+							"pm.test(\"Validate status\", () => {\r",
+							"    pm.response.to.have.status(200)\r",
+							"})"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"min\":3.1415,\r\n    \"max\":3.1416,\r\n    \"order\":\"min-first\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:4000/books/rating",
+					"host": [
+						"localhost"
+					],
+					"port": "4000",
+					"path": [
+						"books",
+						"rating"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Request by Rating min-first",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const body = pm.response.json();\r",
+							"const minEntry = body.results[0];\r",
+							"const maxEntry = body.results[body.results.length - 1];\r",
+							"\r",
+							"pm.test(\"Validate entry is returned\", () => {\r",
+							"    pm.expect(body).to.have.property('results')\r",
+							"})\r",
+							"\r",
+							"pm.test(\"Validate order\", () => {\r",
+							"    pm.expect(minEntry.ratings.average).to.be.below(maxEntry.ratings.average)\r",
+							"})\r",
+							"\r",
+							"pm.test(\"Validate status\", () => {\r",
+							"    pm.response.to.have.status(200)\r",
+							"})"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"min\":2,\r\n    \"max\":3,\r\n    \"order\":\"min-first\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:4000/books/rating",
+					"host": [
+						"localhost"
+					],
+					"port": "4000",
+					"path": [
+						"books",
+						"rating"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Request by Rating max-first",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const body = pm.response.json();\r",
+							"const maxEntry = body.results[0];\r",
+							"const minEntry = body.results[body.results.length - 1];\r",
+							"\r",
+							"pm.test(\"Validate entry is returned\", () => {\r",
+							"    pm.expect(body).to.have.property('results')\r",
+							"})\r",
+							"\r",
+							"pm.test(\"Validate order\", () => {\r",
+							"    pm.expect(maxEntry.ratings.average).to.be.above(minEntry.ratings.average)\r",
+							"})\r",
+							"\r",
+							"pm.test(\"Validate status\", () => {\r",
+							"    pm.response.to.have.status(200)\r",
+							"})"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"min\":2,\r\n    \"max\":3,\r\n    \"order\":\"max-first\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:4000/books/rating",
+					"host": [
+						"localhost"
+					],
+					"port": "4000",
+					"path": [
+						"books",
+						"rating"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update Ratings",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"    pm.collectionVariables.set(\"average\", 3)\r",
+							"    pm.collectionVariables.set(\"count\", 1000)\r",
+							"    pm.collectionVariables.set(\"rating1\", 200)\r",
+							"    pm.collectionVariables.set(\"rating2\", 200)\r",
+							"    pm.collectionVariables.set(\"rating3\", 200)\r",
+							"    pm.collectionVariables.set(\"rating4\", 200)\r",
+							"    pm.collectionVariables.set(\"rating5\", 200)"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const entry = pm.response.json().result;\r",
+							"\r",
+							"pm.test(\"Validate changes\", () => {\r",
+							"    pm.expect(entry.ratings.average).to.equal(pm.collectionVariables.get(\"average\"))\r",
+							"    pm.expect(entry.ratings.count).to.equal(pm.collectionVariables.get(\"count\"))\r",
+							"    pm.expect(entry.ratings.rating_1).to.equal(pm.collectionVariables.get(\"rating1\"))\r",
+							"    pm.expect(entry.ratings.rating_2).to.equal(pm.collectionVariables.get(\"rating2\"))\r",
+							"    pm.expect(entry.ratings.rating_3).to.equal(pm.collectionVariables.get(\"rating3\"))\r",
+							"    pm.expect(entry.ratings.rating_4).to.equal(pm.collectionVariables.get(\"rating4\"))\r",
+							"    pm.expect(entry.ratings.rating_5).to.equal(pm.collectionVariables.get(\"rating5\"))\r",
+							"})\r",
+							"\r",
+							"pm.test(\"Validate status\", () => {\r",
+							"    pm.response.to.have.status(201)\r",
+							"})"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"ratings\":{\r\n        \"average\":{{average}},\r\n        \"count\":{{count}},\r\n        \"rating1\":{{rating1}},\r\n        \"rating2\":{{rating2}},\r\n        \"rating3\":{{rating3}},\r\n        \"rating4\":{{rating4}},\r\n        \"rating5\":{{rating5}}\r\n    }\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:4000/books/rating/{{isbn13}}/",
+					"host": [
+						"localhost"
+					],
+					"port": "4000",
+					"path": [
+						"books",
+						"rating",
+						"{{isbn13}}",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "DELETE by ISBN",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"\r",
+							"const theEntry = pm.response.json().result;\r",
+							"\r",
+							"pm.test(\"Validate isbn13\", () => {\r",
+							"    pm.expect(theEntry).to.have.property('isbn13')\r",
+							"    pm.expect(theEntry.isbn13).to.be.a('Number')\r",
+							"    pm.expect(theEntry.isbn13).to.equal(pm.collectionVariables.get(\"isbn13\"))\r",
+							"})\r",
+							"\r",
+							"pm.test(\"Validate authors\", () => {\r",
+							"    pm.expect(theEntry).to.have.property('authors')\r",
+							"    pm.expect(theEntry.authors).to.be.a('String')\r",
+							"    pm.expect(theEntry.authors).to.equal(pm.collectionVariables.get(\"author\"))\r",
+							"})\r",
+							"\r",
+							"pm.test(\"Validate publication year\", () => {\r",
+							"    pm.expect(theEntry).to.have.property('publication')\r",
+							"    pm.expect(theEntry.publication).to.be.a('Number')\r",
+							"    pm.expect(theEntry.publication).to.equal(pm.collectionVariables.get(\"publication\"))\r",
+							"})\r",
+							"\r",
+							"pm.test(\"Validate original title\", () => {\r",
+							"    pm.expect(theEntry).to.have.property('original_title')\r",
+							"    pm.expect(theEntry.original_title).to.be.a('String')\r",
+							"    pm.expect(theEntry.original_title).to.equal(pm.collectionVariables.get(\"orginal_title\"))\r",
+							"})\r",
+							"\r",
+							"pm.test(\"Validate title\", () => {\r",
+							"    pm.expect(theEntry).to.have.property('title')\r",
+							"    pm.expect(theEntry.title).to.be.a('String')\r",
+							"    pm.expect(theEntry.title).to.equal(pm.collectionVariables.get(\"title\"))\r",
+							"})\r",
+							"\r",
+							"pm.test(\"Validate rating average\", () => {\r",
+							"    pm.expect(theEntry.ratings).to.have.property('average')\r",
+							"    pm.expect(theEntry.ratings.average).to.be.a('Number')\r",
+							"    pm.expect(theEntry.ratings.average).to.equal(pm.collectionVariables.get(\"average\"))\r",
+							"})\r",
+							"\r",
+							"pm.test(\"Validate rating count\", () => {\r",
+							"    pm.expect(theEntry.ratings).to.have.property('count')\r",
+							"    pm.expect(theEntry.ratings.count).to.be.a('Number')\r",
+							"    pm.expect(theEntry.ratings.count).to.equal(pm.collectionVariables.get(\"count\"))\r",
+							"})\r",
+							"\r",
+							"pm.test(\"Validate rating 1 star\", () => {\r",
+							"    pm.expect(theEntry.ratings).to.have.property('rating_1')\r",
+							"    pm.expect(theEntry.ratings.rating_1).to.be.a('Number')\r",
+							"    pm.expect(theEntry.ratings.rating_1).to.equal(pm.collectionVariables.get(\"rating1\"))\r",
+							"})\r",
+							"\r",
+							"pm.test(\"Validate rating 2 star\", () => {\r",
+							"    pm.expect(theEntry.ratings).to.have.property('rating_2')\r",
+							"    pm.expect(theEntry.ratings.rating_2).to.be.a('Number')\r",
+							"    pm.expect(theEntry.ratings.rating_2).to.equal(pm.collectionVariables.get(\"rating2\"))\r",
+							"})\r",
+							"\r",
+							"pm.test(\"Validate rating 3 star\", () => {\r",
+							"    pm.expect(theEntry.ratings).to.have.property('rating_3')\r",
+							"    pm.expect(theEntry.ratings.rating_3).to.be.a('Number')\r",
+							"    pm.expect(theEntry.ratings.rating_3).to.equal(pm.collectionVariables.get(\"rating3\"))\r",
+							"})\r",
+							"\r",
+							"pm.test(\"Validate rating 4 star\", () => {\r",
+							"    pm.expect(theEntry.ratings).to.have.property('rating_4')\r",
+							"    pm.expect(theEntry.ratings.rating_4).to.be.a('Number')\r",
+							"    pm.expect(theEntry.ratings.rating_4).to.equal(pm.collectionVariables.get(\"rating4\"))\r",
+							"})\r",
+							"\r",
+							"pm.test(\"Validate rating 5 star\", () => {\r",
+							"    pm.expect(theEntry.ratings).to.have.property('rating_5')\r",
+							"    pm.expect(theEntry.ratings.rating_5).to.be.a('Number')\r",
+							"    pm.expect(theEntry.ratings.rating_5).to.equal(pm.collectionVariables.get(\"rating5\"))\r",
+							"})\r",
+							"\r",
+							"\r",
+							"pm.test(\"Validate large img url\", () => {\r",
+							"    pm.expect(theEntry.icons).to.have.property('large')\r",
+							"    pm.expect(theEntry.icons.large).to.be.a('String')\r",
+							"    pm.expect(theEntry.icons.large).to.equal(pm.collectionVariables.get(\"large\"))\r",
+							"})\r",
+							"\r",
+							"pm.test(\"Validate small img url\", () => {\r",
+							"    pm.expect(theEntry.icons).to.have.property('small')\r",
+							"    pm.expect(theEntry.icons.small).to.be.a('String')\r",
+							"    pm.expect(theEntry.icons.small).to.equal(pm.collectionVariables.get(\"small\"))\r",
+							"})\r",
+							"\r",
+							"pm.test(\"Validate status\", () => {\r",
+							"    pm.response.to.have.status(200)\r",
+							"})"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:4000/books/isbns/9780140449136",
+					"host": [
+						"localhost"
+					],
+					"port": "4000",
+					"path": [
+						"books",
+						"isbns",
+						"9780140449136"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Add Test Book Copy",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"entry\": {\r\n        \"isbn13\": {{isbn13}},\r\n        \"authors\": \"{{author}}\",\r\n        \"publication\": {{publication}},\r\n        \"original_title\": \"{{orginal_title}}\",\r\n        \"title\": \"{{title}}\",\r\n        \"ratings\": {\r\n            \"average\": {{average}},\r\n            \"count\": {{count}},\r\n            \"rating1\": {{rating1}},\r\n            \"rating2\": {{rating2}},\r\n            \"rating3\": {{rating3}},\r\n            \"rating4\": {{rating4}},\r\n            \"rating5\": {{rating5}}\r\n        },\r\n        \"icons\": {\r\n            \"large\": \"{{large}}\",\r\n            \"small\": \"{{small}}\"\r\n        }\r\n    }\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:4000/books",
+					"host": [
+						"localhost"
+					],
+					"port": "4000",
+					"path": [
+						"books"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "DELETE by author",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"/*try {\r",
+							"    pm.sendRequest({\r",
+							"        url: pm.collectionVariables.get(\"addRequest\"),\r",
+							"        method: 'POST',\r",
+							"        body: {\r",
+							"            mode: 'raw',\r",
+							"            raw: JSON.stringify({\r",
+							"                entry: {\r",
+							"                    isbn13: pm.collectionVariables.get(\"isbn13\"),\r",
+							"                    author: pm.collectionVariables.get(\"author\"),\r",
+							"                    publication: pm.collectionVariables.get(\"publication\"),\r",
+							"                    original_title: pm.collectionVariables.get(\"original_title\"),\r",
+							"                    title: pm.collectionVariables.get(\"title\"),\r",
+							"                    ratings: {\r",
+							"                        average: pm.collectionVariables.get(\"average\"),\r",
+							"                        count: pm.collectionVariables.get(\"count\"),\r",
+							"                        rating1: pm.collectionVariables.get(\"rating1\"),\r",
+							"                        rating2: pm.collectionVariables.get(\"rating2\"),\r",
+							"                        rating3: pm.collectionVariables.get(\"rating3\"),\r",
+							"                        rating4: pm.collectionVariables.get(\"rating4\"),\r",
+							"                        rating5: pm.collectionVariables.get(\"rating5\")\r",
+							"                    },\r",
+							"                    icons: {\r",
+							"                        large: pm.collectionVariables.get(\"large\"),\r",
+							"                        small: pm.collectionVariables.get(\"small\")\r",
+							"                    }\r",
+							"                }\r",
+							"            })\r",
+							"        },\r",
+							"        header: {\r",
+							"            'Content-Type': 'application/json'\r",
+							"        }\r",
+							"    }, function (err, res) {\r",
+							"        if (err) {\r",
+							"            console.error(\"Failed to send request:\", err);\r",
+							"            throw err;\r",
+							"        } else {\r",
+							"            console.log(\"Request successful:\", res);\r",
+							"        }\r",
+							"    });\r",
+							"} catch (error) {\r",
+							"    console.error(\"Caught error in Pre-request Script:\", error.message);\r",
+							"    throw error;  // Stop further execution if there's an error\r",
+							"}*/\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const theEntry = pm.response.json().results[0];",
+							"",
+							"pm.test(\"Validate isbn13\", () => {",
+							"    pm.expect(theEntry).to.have.property('isbn13')",
+							"    pm.expect(theEntry.isbn13).to.be.a('Number')",
+							"    pm.expect(theEntry.isbn13).to.equal(pm.collectionVariables.get(\"isbn13\"))",
+							"})",
+							"",
+							"pm.test(\"Validate authors\", () => {",
+							"    pm.expect(theEntry).to.have.property('authors')",
+							"    pm.expect(theEntry.authors).to.be.a('String')",
+							"    pm.expect(theEntry.authors).to.equal(pm.collectionVariables.get(\"author\"))",
+							"})",
+							"",
+							"pm.test(\"Validate publication year\", () => {",
+							"    pm.expect(theEntry).to.have.property('publication')",
+							"    pm.expect(theEntry.publication).to.be.a('Number')",
+							"    pm.expect(theEntry.publication).to.equal(pm.collectionVariables.get(\"publication\"))",
+							"})",
+							"",
+							"pm.test(\"Validate original title\", () => {",
+							"    pm.expect(theEntry).to.have.property('original_title')",
+							"    pm.expect(theEntry.original_title).to.be.a('String')",
+							"    pm.expect(theEntry.original_title).to.equal(pm.collectionVariables.get(\"orginal_title\"))",
+							"})",
+							"",
+							"pm.test(\"Validate title\", () => {",
+							"    pm.expect(theEntry).to.have.property('title')",
+							"    pm.expect(theEntry.title).to.be.a('String')",
+							"    pm.expect(theEntry.title).to.equal(pm.collectionVariables.get(\"title\"))",
+							"})",
+							"",
+							"pm.test(\"Validate rating average\", () => {",
+							"    pm.expect(theEntry.ratings).to.have.property('average')",
+							"    pm.expect(theEntry.ratings.average).to.be.a('Number')",
+							"    pm.expect(theEntry.ratings.average).to.equal(pm.collectionVariables.get(\"average\"))",
+							"})",
+							"",
+							"pm.test(\"Validate rating count\", () => {",
+							"    pm.expect(theEntry.ratings).to.have.property('count')",
+							"    pm.expect(theEntry.ratings.count).to.be.a('Number')",
+							"    pm.expect(theEntry.ratings.count).to.equal(pm.collectionVariables.get(\"count\"))",
+							"})",
+							"",
+							"pm.test(\"Validate rating 1 star\", () => {",
+							"    pm.expect(theEntry.ratings).to.have.property('rating_1')",
+							"    pm.expect(theEntry.ratings.rating_1).to.be.a('Number')",
+							"    pm.expect(theEntry.ratings.rating_1).to.equal(pm.collectionVariables.get(\"rating1\"))",
+							"})",
+							"",
+							"pm.test(\"Validate rating 2 star\", () => {",
+							"    pm.expect(theEntry.ratings).to.have.property('rating_2')",
+							"    pm.expect(theEntry.ratings.rating_2).to.be.a('Number')",
+							"    pm.expect(theEntry.ratings.rating_2).to.equal(pm.collectionVariables.get(\"rating2\"))",
+							"})",
+							"",
+							"pm.test(\"Validate rating 3 star\", () => {",
+							"    pm.expect(theEntry.ratings).to.have.property('rating_3')",
+							"    pm.expect(theEntry.ratings.rating_3).to.be.a('Number')",
+							"    pm.expect(theEntry.ratings.rating_3).to.equal(pm.collectionVariables.get(\"rating3\"))",
+							"})",
+							"",
+							"pm.test(\"Validate rating 4 star\", () => {",
+							"    pm.expect(theEntry.ratings).to.have.property('rating_4')",
+							"    pm.expect(theEntry.ratings.rating_4).to.be.a('Number')",
+							"    pm.expect(theEntry.ratings.rating_4).to.equal(pm.collectionVariables.get(\"rating4\"))",
+							"})",
+							"",
+							"pm.test(\"Validate rating 5 star\", () => {",
+							"    pm.expect(theEntry.ratings).to.have.property('rating_5')",
+							"    pm.expect(theEntry.ratings.rating_5).to.be.a('Number')",
+							"    pm.expect(theEntry.ratings.rating_5).to.equal(pm.collectionVariables.get(\"rating5\"))",
+							"})",
+							"",
+							"",
+							"pm.test(\"Validate large img url\", () => {",
+							"    pm.expect(theEntry.icons).to.have.property('large')",
+							"    pm.expect(theEntry.icons.large).to.be.a('String')",
+							"    pm.expect(theEntry.icons.large).to.equal(pm.collectionVariables.get(\"large\"))",
+							"})",
+							"",
+							"pm.test(\"Validate small img url\", () => {",
+							"    pm.expect(theEntry.icons).to.have.property('small')",
+							"    pm.expect(theEntry.icons.small).to.be.a('String')",
+							"    pm.expect(theEntry.icons.small).to.equal(pm.collectionVariables.get(\"small\"))",
+							"})",
+							"",
+							"pm.test(\"Validate status\", () => {",
+							"    pm.response.to.have.status(200)",
+							"})"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:4000/books/author/{{author}}",
+					"host": [
+						"localhost"
+					],
+					"port": "4000",
+					"path": [
+						"books",
+						"author",
+						"{{author}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Add Test Book Copy 2",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"entry\": {\r\n        \"isbn13\": {{isbn13}},\r\n        \"authors\": \"{{author}}\",\r\n        \"publication\": {{publication}},\r\n        \"original_title\": \"{{orginal_title}}\",\r\n        \"title\": \"{{title}}\",\r\n        \"ratings\": {\r\n            \"average\": {{average}},\r\n            \"count\": {{count}},\r\n            \"rating1\": {{rating1}},\r\n            \"rating2\": {{rating2}},\r\n            \"rating3\": {{rating3}},\r\n            \"rating4\": {{rating4}},\r\n            \"rating5\": {{rating5}}\r\n        },\r\n        \"icons\": {\r\n            \"large\": \"{{large}}\",\r\n            \"small\": \"{{small}}\"\r\n        }\r\n    }\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:4000/books",
+					"host": [
+						"localhost"
+					],
+					"port": "4000",
+					"path": [
+						"books"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "DELETE by title",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const theEntry = pm.response.json().results[0];",
+							"",
+							"pm.test(\"Validate isbn13\", () => {",
+							"    pm.expect(theEntry).to.have.property('isbn13')",
+							"    pm.expect(theEntry.isbn13).to.be.a('Number')",
+							"    pm.expect(theEntry.isbn13).to.equal(pm.collectionVariables.get(\"isbn13\"))",
+							"})",
+							"",
+							"pm.test(\"Validate authors\", () => {",
+							"    pm.expect(theEntry).to.have.property('authors')",
+							"    pm.expect(theEntry.authors).to.be.a('String')",
+							"    pm.expect(theEntry.authors).to.equal(pm.collectionVariables.get(\"author\"))",
+							"})",
+							"",
+							"pm.test(\"Validate publication year\", () => {",
+							"    pm.expect(theEntry).to.have.property('publication')",
+							"    pm.expect(theEntry.publication).to.be.a('Number')",
+							"    pm.expect(theEntry.publication).to.equal(pm.collectionVariables.get(\"publication\"))",
+							"})",
+							"",
+							"pm.test(\"Validate original title\", () => {",
+							"    pm.expect(theEntry).to.have.property('original_title')",
+							"    pm.expect(theEntry.original_title).to.be.a('String')",
+							"    pm.expect(theEntry.original_title).to.equal(pm.collectionVariables.get(\"orginal_title\"))",
+							"})",
+							"",
+							"pm.test(\"Validate title\", () => {",
+							"    pm.expect(theEntry).to.have.property('title')",
+							"    pm.expect(theEntry.title).to.be.a('String')",
+							"    pm.expect(theEntry.title).to.equal(pm.collectionVariables.get(\"title\"))",
+							"})",
+							"",
+							"pm.test(\"Validate rating average\", () => {",
+							"    pm.expect(theEntry.ratings).to.have.property('average')",
+							"    pm.expect(theEntry.ratings.average).to.be.a('Number')",
+							"    pm.expect(theEntry.ratings.average).to.equal(pm.collectionVariables.get(\"average\"))",
+							"})",
+							"",
+							"pm.test(\"Validate rating count\", () => {",
+							"    pm.expect(theEntry.ratings).to.have.property('count')",
+							"    pm.expect(theEntry.ratings.count).to.be.a('Number')",
+							"    pm.expect(theEntry.ratings.count).to.equal(pm.collectionVariables.get(\"count\"))",
+							"})",
+							"",
+							"pm.test(\"Validate rating 1 star\", () => {",
+							"    pm.expect(theEntry.ratings).to.have.property('rating_1')",
+							"    pm.expect(theEntry.ratings.rating_1).to.be.a('Number')",
+							"    pm.expect(theEntry.ratings.rating_1).to.equal(pm.collectionVariables.get(\"rating1\"))",
+							"})",
+							"",
+							"pm.test(\"Validate rating 2 star\", () => {",
+							"    pm.expect(theEntry.ratings).to.have.property('rating_2')",
+							"    pm.expect(theEntry.ratings.rating_2).to.be.a('Number')",
+							"    pm.expect(theEntry.ratings.rating_2).to.equal(pm.collectionVariables.get(\"rating2\"))",
+							"})",
+							"",
+							"pm.test(\"Validate rating 3 star\", () => {",
+							"    pm.expect(theEntry.ratings).to.have.property('rating_3')",
+							"    pm.expect(theEntry.ratings.rating_3).to.be.a('Number')",
+							"    pm.expect(theEntry.ratings.rating_3).to.equal(pm.collectionVariables.get(\"rating3\"))",
+							"})",
+							"",
+							"pm.test(\"Validate rating 4 star\", () => {",
+							"    pm.expect(theEntry.ratings).to.have.property('rating_4')",
+							"    pm.expect(theEntry.ratings.rating_4).to.be.a('Number')",
+							"    pm.expect(theEntry.ratings.rating_4).to.equal(pm.collectionVariables.get(\"rating4\"))",
+							"})",
+							"",
+							"pm.test(\"Validate rating 5 star\", () => {",
+							"    pm.expect(theEntry.ratings).to.have.property('rating_5')",
+							"    pm.expect(theEntry.ratings.rating_5).to.be.a('Number')",
+							"    pm.expect(theEntry.ratings.rating_5).to.equal(pm.collectionVariables.get(\"rating5\"))",
+							"})",
+							"",
+							"",
+							"pm.test(\"Validate large img url\", () => {",
+							"    pm.expect(theEntry.icons).to.have.property('large')",
+							"    pm.expect(theEntry.icons.large).to.be.a('String')",
+							"    pm.expect(theEntry.icons.large).to.equal(pm.collectionVariables.get(\"large\"))",
+							"})",
+							"",
+							"pm.test(\"Validate small img url\", () => {",
+							"    pm.expect(theEntry.icons).to.have.property('small')",
+							"    pm.expect(theEntry.icons.small).to.be.a('String')",
+							"    pm.expect(theEntry.icons.small).to.equal(pm.collectionVariables.get(\"small\"))",
+							"})",
+							"",
+							"pm.test(\"Validate status\", () => {",
+							"    pm.response.to.have.status(200)",
+							"})"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:4000/books/title/{{title}}",
+					"host": [
+						"localhost"
+					],
+					"port": "4000",
+					"path": [
+						"books",
+						"title",
+						"{{title}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Pagination",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const response = pm.response.json()\r",
+							"const body = pm.request.json()\r",
+							"\r",
+							"pm.test(\"Pagination object validity\", () => {\r",
+							"    pm.expect(response.pagination).to.have.property('limit')\r",
+							"    pm.expect(response.pagination.limit).to.be.a('Number')\r",
+							"    if(body.limit > 0) {\r",
+							"        //If the limit in request body is a positive non zero number\r",
+							"        // then pagination.limit should be equal\r",
+							"        pm.expect(response.pagination.limit).to.equal(body.limit)\r",
+							"    }\r",
+							"    else {\r",
+							"        // Otherwise if it was invalid or missing it should be the default value of 16\r",
+							"        pm.expect(response.pagination.limit).to.equal(16)\r",
+							"    }\r",
+							"\r",
+							"    pm.expect(pagination).to.have.property('offset')\r",
+							"    pm.expect(pagination.offset).to.be.a('Number')\r",
+							"    if(body.offset >= 0) {\r",
+							"        //If the offset in the request body is a non negative number\r",
+							"        // then pagination.offset should be equal\r",
+							"        pm.expect(response.pagination.offset).to.equal(body.offset)\r",
+							"    }\r",
+							"    else {\r",
+							"        // Otherwise if it was invalid or missing it should be the default value of 0\r",
+							"        pm.expect(response.pagination.offset).to.equal(0)\r",
+							"    }\r",
+							"    \r",
+							"    pm.expect(response.pagination).to.have.property('nextPage')\r",
+							"    pm.expect(response.pagination.nextPage).to.be.a('Number')\r",
+							"    pm.expect(response.pagination.nextPage).to.equal(response.pagination.limit + response.pagination.offset)\r",
+							"\r",
+							"    pm.expect(response.pagination).to.have.property('totalRecords')\r",
+							"    pm.expect(response.pagination.totalRecords).to.be.a('Number')\r",
+							"\r",
+							"})\r",
+							"\r",
+							"pm.test(\"Pagination books\", () => {\r",
+							"    const books = pm.response.json().results\r",
+							"    pm.expect(books).to.be.an(\"array\")\r",
+							"    //If we're not at the end we expect to get limit number of books\r",
+							"    if(response.pagination.totalRecords >= response.pagination.offset + response.pagination.limit) {\r",
+							"        pm.expect(books.length).to.equal(response.pagination.limit)\r",
+							"    }\r",
+							"    else {\r",
+							"        //Otherwise we expect to get either none if our offset is too high or the difference between offset and total if we're just before the end \r",
+							"        const numBooks = (response.pagination.totalRecords - response.pagination.offset) > 0 ?\r",
+							"        response.pagination.totalRecords - response.pagination.offset : 0\r",
+							"        pm.expect(books.length).to.equal(numBooks)\r",
+							"    }\r",
+							"})\r",
+							"\r",
+							"pm.test(\"Validate status\", () => {\r",
+							"    pm.response.to.have.status(200)\r",
+							"})"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"limit\":20,\r\n    \"offset\":5\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:4000/books/pagination/offset",
+					"host": [
+						"localhost"
+					],
+					"port": "4000",
+					"path": [
+						"books",
+						"pagination",
+						"offset"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Pagination No Offset",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const response = pm.response.json()\r",
+							"\r",
+							"\r",
+							"pm.test(\"Pagination object validity\", () => {\r",
+							"    pm.expect(response.pagination).to.have.property('limit')\r",
+							"    pm.expect(response.pagination.limit).to.be.a('Number')\r",
+							"    if(pm.collectionVariables.get(\"limit\") > 0) {\r",
+							"        //If the limit in request body is a positive non zero number\r",
+							"        // then pagination.limit should be equal\r",
+							"        pm.expect(response.pagination.limit).to.equal(pm.collectionVariables.get(\"limit\"))\r",
+							"    }\r",
+							"    else {\r",
+							"        // Otherwise if it was invalid or missing it should be the default value of 16\r",
+							"        pm.expect(response.pagination.limit).to.equal(16)\r",
+							"    }\r",
+							"\r",
+							"    pm.expect(response.pagination).to.have.property('offset')\r",
+							"    pm.expect(response.pagination.offset).to.be.a('Number')\r",
+							"    // No offset so it should be the default value of 0\r",
+							"    pm.expect(response.pagination.offset).to.equal(0)\r",
+							"    \r",
+							"    pm.expect(response.pagination).to.have.property('nextPage')\r",
+							"    pm.expect(response.pagination.nextPage).to.be.a('Number')\r",
+							"    pm.expect(response.pagination.nextPage).to.equal(response.pagination.limit + response.pagination.offset)\r",
+							"\r",
+							"    pm.expect(response.pagination).to.have.property('totalRecords')\r",
+							"    pm.expect(response.pagination.totalRecords).to.be.a('Number')\r",
+							"\r",
+							"})\r",
+							"\r",
+							"pm.test(\"Pagination books\", () => {\r",
+							"    const books = pm.response.json().results\r",
+							"    pm.expect(books).to.be.an(\"array\")\r",
+							"    //If we're not at the end we expect to get limit number of books\r",
+							"    if(response.pagination.totalRecords >= response.pagination.offset + response.pagination.limit) {\r",
+							"        pm.expect(books.length).to.equal(response.pagination.limit)\r",
+							"    }\r",
+							"    else {\r",
+							"        //Otherwise we expect to get either none if our offset is too high or the difference between offset and total if we're just before the end \r",
+							"        const numBooks = (response.pagination.totalRecords - response.pagination.offset) > 0 ?\r",
+							"        response.pagination.totalRecords - response.pagination.offset : 0\r",
+							"        pm.expect(books.length).to.equal(numBooks)\r",
+							"    }\r",
+							"})\r",
+							"\r",
+							"pm.test(\"Validate status\", () => {\r",
+							"    pm.response.to.have.status(200)\r",
+							"})"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"pm.collectionVariables.set(\"limit\", 20)"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"limit\":{{limit}}\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:4000/books/pagination/offset",
+					"host": [
+						"localhost"
+					],
+					"port": "4000",
+					"path": [
+						"books",
+						"pagination",
+						"offset"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Pagination No Limit",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const response = pm.response.json()\r",
+							"\r",
+							"pm.test(\"Pagination object validity\", () => {\r",
+							"    pm.expect(response.pagination).to.have.property('limit')\r",
+							"    pm.expect(response.pagination.limit).to.be.a('number')\r",
+							"    // No limit so it should be the default value of 16\r",
+							"    pm.expect(response.pagination.limit).to.equal(16)\r",
+							"\r",
+							"    pm.expect(response.pagination).to.have.property('offset')\r",
+							"    pm.expect(response.pagination.offset).to.be.a('number')\r",
+							"    if(pm.collectionVariables.get(\"offset\") >= 0) {\r",
+							"        //If the offset in the request body is a non negative number\r",
+							"        // then pagination.offset should be equal\r",
+							"        pm.expect(response.pagination.offset).to.equal(pm.collectionVariables.get(\"offset\"))\r",
+							"    }\r",
+							"    else {\r",
+							"        // Otherwise if it was invalid or missing it should be the default value of 0\r",
+							"        pm.expect(response.pagination.offset).to.equal(0)\r",
+							"    }\r",
+							"    \r",
+							"    pm.expect(response.pagination).to.have.property('nextPage')\r",
+							"    pm.expect(response.pagination.nextPage).to.be.a('number')\r",
+							"    pm.expect(response.pagination.nextPage).to.equal(response.pagination.limit + response.pagination.offset)\r",
+							"\r",
+							"    pm.expect(response.pagination).to.have.property('totalRecords')\r",
+							"    pm.expect(response.pagination.totalRecords).to.be.a('number')\r",
+							"\r",
+							"})\r",
+							"\r",
+							"pm.test(\"Pagination books\", () => {\r",
+							"    const books = pm.response.json().results\r",
+							"    pm.expect(books).to.be.an(\"array\")\r",
+							"    //If we're not at the end we expect to get limit number of books\r",
+							"    if(response.pagination.totalRecords >= response.pagination.offset + response.pagination.limit) {\r",
+							"        pm.expect(books.length).to.equal(response.pagination.limit)\r",
+							"    }\r",
+							"    else {\r",
+							"        //Otherwise we expect to get either none if our offset is too high or the difference between offset and total if we're just before the end \r",
+							"        const numBooks = (response.pagination.totalRecords - response.pagination.offset) > 0 ?\r",
+							"        response.pagination.totalRecords - response.pagination.offset : 0\r",
+							"        pm.expect(books.length).to.equal(numBooks)\r",
+							"    }\r",
+							"})\r",
+							"\r",
+							"pm.test(\"Validate status\", () => {\r",
+							"    pm.response.to.have.status(200)\r",
+							"})\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"pm.collectionVariables.set(\"offset\", 5)"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"offset\":{{offset}}\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:4000/books/pagination/offset",
+					"host": [
+						"localhost"
+					],
+					"port": "4000",
+					"path": [
+						"books",
+						"pagination",
+						"offset"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Pagination Empty Body",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const response = pm.response.json()\r",
+							"\r",
+							"pm.test(\"Pagination object validity\", () => {\r",
+							"    pm.expect(response.pagination).to.have.property('limit')\r",
+							"    pm.expect(response.pagination.limit).to.be.a('Number')\r",
+							"    // Limit missing so it should be the default value of 16\r",
+							"    pm.expect(response.pagination.limit).to.equal(16)\r",
+							"\r",
+							"    pm.expect(response.pagination).to.have.property('offset') // Fixed variable name from pagination to response.pagination\r",
+							"    pm.expect(response.pagination.offset).to.be.a('Number')\r",
+							"    // Offset missing so it should be the default value of 0\r",
+							"    pm.expect(response.pagination.offset).to.equal(0)\r",
+							"    \r",
+							"    pm.expect(response.pagination).to.have.property('nextPage')\r",
+							"    pm.expect(response.pagination.nextPage).to.be.a('Number')\r",
+							"    pm.expect(response.pagination.nextPage).to.equal(response.pagination.limit + response.pagination.offset)\r",
+							"\r",
+							"    pm.expect(response.pagination).to.have.property('totalRecords')\r",
+							"    pm.expect(response.pagination.totalRecords).to.be.a('Number')\r",
+							"\r",
+							"})\r",
+							"\r",
+							"pm.test(\"Pagination books\", () => {\r",
+							"    const books = pm.response.json().results\r",
+							"    pm.expect(books).to.be.an(\"array\")\r",
+							"    //If we're not at the end we expect to get limit number of books\r",
+							"    if(response.pagination.totalRecords >= response.pagination.offset + response.pagination.limit) {\r",
+							"        pm.expect(books.length).to.equal(response.pagination.limit)\r",
+							"    }\r",
+							"    else {\r",
+							"        //Otherwise we expect to get either none if our offset is too high or the difference between offset and total if we're just before the end \r",
+							"        const numBooks = (response.pagination.totalRecords - response.pagination.offset) > 0 ?\r",
+							"        response.pagination.totalRecords - response.pagination.offset : 0\r",
+							"        pm.expect(books.length).to.equal(numBooks)\r",
+							"    }\r",
+							"})\r",
+							"\r",
+							"pm.test(\"Validate status\", () => {\r",
+							"    pm.response.to.have.status(200)\r",
+							"})\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:4000/books/pagination/offset",
+					"host": [
+						"localhost"
+					],
+					"port": "4000",
+					"path": [
+						"books",
+						"pagination",
+						"offset"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{token}}",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "firstname",
+			"value": ""
+		},
+		{
+			"key": "lastname",
+			"value": ""
+		},
+		{
+			"key": "email",
+			"value": ""
+		},
+		{
+			"key": "password",
+			"value": ""
+		},
+		{
+			"key": "username",
+			"value": ""
+		},
+		{
+			"key": "phone",
+			"value": ""
+		},
+		{
+			"key": "token",
+			"value": ""
+		},
+		{
+			"key": "role",
+			"value": ""
+		},
+		{
+			"key": "isbn13",
+			"value": ""
+		},
+		{
+			"key": "author",
+			"value": ""
+		},
+		{
+			"key": "publication",
+			"value": ""
+		},
+		{
+			"key": "orginal_title",
+			"value": ""
+		},
+		{
+			"key": "title",
+			"value": ""
+		},
+		{
+			"key": "average",
+			"value": ""
+		},
+		{
+			"key": "count",
+			"value": ""
+		},
+		{
+			"key": "rating1",
+			"value": ""
+		},
+		{
+			"key": "rating2",
+			"value": ""
+		},
+		{
+			"key": "rating3",
+			"value": ""
+		},
+		{
+			"key": "rating4",
+			"value": ""
+		},
+		{
+			"key": "rating5",
+			"value": ""
+		},
+		{
+			"key": "large",
+			"value": ""
+		},
+		{
+			"key": "small",
+			"value": ""
+		},
+		{
+			"key": "addRequest",
+			"value": ""
+		},
+		{
+			"key": "addBody",
+			"value": ""
+		},
+		{
+			"key": "limit",
+			"value": ""
+		},
+		{
+			"key": "offset",
+			"value": ""
+		}
+	]
+}
