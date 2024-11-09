@@ -6,8 +6,8 @@ import { pool, validationFunctions } from '../../core/utilities';
 // retrieve the router object from express
 const booksRouter: Router = express.Router();
 
-/*
-interface: IRatings {
+
+interface IRatings {
     average: number;
     count: number;
     rating_1: number;
@@ -17,12 +17,12 @@ interface: IRatings {
     rating_5: number;
 }
 
-interface: IUrlIcon {
+interface IUrlIcon {
     large: string;
     small: string;
 }
 
-interface: IBook {
+interface IBook {
     isbn13: number;
     authors: string;
     publication: number;
@@ -31,7 +31,32 @@ interface: IBook {
     ratings: IRatings;
     icons: IUrlIcon;
 }
-*/
+
+function toBook(row): IBook {
+    const sanitizedRatings: IRatings = {
+        average: row.rating_avg,
+        count: row.rating_count,
+        rating_1: row.rating_1_star,
+        rating_2: row.rating_2_star,
+        rating_3: row.rating_3_star,
+        rating_4: row.rating_4_star,
+        rating_5: row.rating_5_star
+    };
+    const sanitizedUrls: IUrlIcon = {
+        large: row.image_url,
+        small: row.image_small_url
+    };
+    
+    return {
+        isbn13: Number(row.isbn13),
+        authors: "", // TODO
+        publication: row.publication_year,
+        original_title: row.original_title,
+        title: row.title,
+        ratings: sanitizedRatings,
+        icons: sanitizedUrls
+    };
+}
 
 /**
  * @api {post} /books Request to add a book
@@ -93,19 +118,6 @@ booksRouter.post(
     '/',
     (request: IJwtRequest, response: Response, next: NextFunction) => {
         const isbn: number = request.body.entry.isbn13 as number;
-        const authors: string = request.body.entry.authors as string;
-        const publication: number = request.body.entry.publication as number;
-        const original_title: string = request.body.entry.original_title as string;
-        const title: string = request.body.entry.title as string;
-        const rating_avg: number = request.body.entry.ratings.average as number;
-        const rating_count: number = request.body.entry.ratings.count as number;
-        const rating_1_star: number = request.body.entry.ratings.rating1 as number;
-        const rating_2_star: number = request.body.entry.ratings.rating2 as number;
-        const rating_3_star: number = request.body.entry.ratings.rating3 as number;
-        const rating_4_star: number = request.body.entry.ratings.rating4 as number;
-        const rating_5_star: number = request.body.entry.ratings.rating5 as number;
-        const image_url: string = request.body.entry.icons.image_url as string;
-        const image_small_url: string = request.body.entry.icons
         if (validationFunctions.isNumberProvided(isbn) && isbn >= 0) {
             next();
         } else {
@@ -131,14 +143,14 @@ booksRouter.post(
             request.body.entry.ratings.rating3,
             request.body.entry.ratings.rating4,
             request.body.entry.ratings.rating5,
-            request.body.entry.icons.image_url,
-            request.body.entry.icons.image_small_url,
+            request.body.entry.icons.large,
+            request.body.entry.icons.small,
         ];
 
         pool.query(theQuery, values)
             .then((result) => {
                 response.status(201).send({
-                    entry: result.rows[0],
+                    message: "Book successfully added.",
                 });
             })
             .catch((error) => {
@@ -146,9 +158,9 @@ booksRouter.post(
                     error.detail != undefined &&
                     (error.detail as string).endsWith('already exists.')
                 ) {
-                    console.error('Name exists');
+                    console.error('Book exists');
                     response.status(400).send({
-                        message: 'Name exists',
+                        message: 'Book exists',
                     });
                 } else {
                     console.error('DB Query error on POST');
@@ -232,7 +244,7 @@ booksRouter.get('/isbns/:isbn', (request: IJwtRequest, response: Response) => {
 });
 
 /**
- * @api {delete} /books/:isbn Delete book by ISBN
+ * @api {delete} /books/isbns/:isbn Delete book by ISBN
  * @apiName DeleteBookByISBN
  * @apiGroup Books
  * @apiDescription Delete a book from the database that matches an exact 13-digit
@@ -280,14 +292,11 @@ booksRouter.delete(
     (request: IJwtRequest, response: Response) => {
         const theQuery = 'DELETE FROM Books WHERE isbn13 = $1 RETURNING *';
         const values = [request.params.isbn];
-        console.log(values);
 
         pool.query(theQuery, values)
             .then((result) => {
-                if (result.rowCount >= 1) {
-                    response.send({
-                        entry: result.rows,
-                    });
+                if (result.rowCount == 1) {
+                    response.send( toBook(result.rows[-1]) );
                 } else {
                     response.status(404).send({
                         message: 'isbn not found',
