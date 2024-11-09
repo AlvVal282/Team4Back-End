@@ -58,6 +58,11 @@ function toBook(row): IBook {
     };
 };
 
+// When multiple rows are returned
+function toBooks(row): IBook[] {
+    return row.map(toBook);
+}
+
 const verifyElement = (isValid, name, response) => {
     if (!isValid) {
         console.error('Invalid or missing ' + name);
@@ -951,21 +956,42 @@ DELETE FROM Books WHERE title = $1 RETURNING *, (SELECT authors FROM delete_book
  * @apiError (400: Empty query parameter) {String} message "No query parameter in url"
  */
 booksRouter.get('/author/:name', (request: IJwtRequest, response: Response) => {
-    const theQuery = `
-        SELECT b.isbn13, b.title, b.original_title, b.publication_year, 
-               b.rating_avg, b.rating_count, b.image_url 
-        FROM Books b 
-        JOIN Books_Authors ba ON b.isbn13 = ba.isbn13 
-        JOIN Author a ON ba.Author_ID = a.Author_ID 
-        WHERE a.Author_Name = $1;
-    `;
+    const theQuery = `SELECT 
+    b.isbn13,
+    b.title,                         
+    b.original_title,                
+    b.publication_year,              
+    b.rating_avg,                    
+    b.rating_count,                  
+    b.rating_1_star,                 
+    b.rating_2_star,                 
+    b.rating_3_star,                 
+    b.rating_4_star,                 
+    b.rating_5_star,                 
+    b.image_url,                     
+    b.image_small_url,               
+    string_agg(a.Author_name, ', ' ORDER BY a.Author_name) AS authors
+FROM 
+    books b
+JOIN 
+    Books_Authors ba ON b.isbn13 = ba.isbn13
+JOIN 
+    Author a ON ba.Author_id = a.Author_id
+WHERE
+    a.Author_name = $1 
+GROUP BY 
+    b.isbn13, b.title, b.original_title, b.publication_year, 
+    b.rating_avg, b.rating_count, b.rating_1_star, b.rating_2_star,
+    b.rating_3_star, b.rating_4_star, b.rating_5_star, b.image_url, b.image_small_url
+;` 
+
     const values = [request.params.name];
 
     pool.query(theQuery, values)
         .then((result) => {
             if (result.rowCount >= 1) {
                 response.send({
-                    entry: result.rows,
+                    entry: toBooks(result.rows),
                 });
             } else {
                 response.status(404).send({
@@ -1063,7 +1089,7 @@ DELETE FROM Books WHERE isbn13 IN (SELECT isbn13 FROM delete_book) RETURNING *, 
             .then((result) => {
                 if (result.rowCount >= 1) {
                     response.send({
-                        entry: result.rows,
+                        entry: toBooks(result.rows),
                     });
                 } else {
                     response.status(404).send({
