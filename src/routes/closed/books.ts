@@ -179,12 +179,17 @@ booksRouter.post(
             "Rating",
             response
         );
-        const icons = request.body.icons;
+        const icons = request.body.entry.icons;
         verifyElement(
             icons != null
-                && icons.large != null && validationFunctions.isStringProvided(icons.large)
+                && icons.large != null && validationFunctions.isStringProvided(icons.large),
+            "Image Url",
+            response
+        );
+        verifyElement(
+            icons != null
                 && icons.small != null && validationFunctions.isStringProvided(icons.small),
-            "Title",
+            "Image Small Url",
             response
         );
         next();
