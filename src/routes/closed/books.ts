@@ -758,14 +758,42 @@ booksRouter.put('/rating/:isbn',
  * @apiError (400: Empty query parameter) {String} message "No query parameter in url"
  */
 booksRouter.get('/title/:name', (request: IJwtRequest, response: Response) => {
-    const theQuery = 'SELECT * FROM Books WHERE title = $1';
+    const theQuery = `SELECT 
+    b.isbn13,
+    b.title,                         
+    b.original_title,                
+    b.publication_year,              
+    b.rating_avg,                    
+    b.rating_count,                  
+    b.rating_1_star,                 
+    b.rating_2_star,                 
+    b.rating_3_star,                 
+    b.rating_4_star,                 
+    b.rating_5_star,                 
+    b.image_url,                     
+    b.image_small_url,               
+    string_agg(a.Author_name, ', ' ORDER BY a.Author_name) AS authors
+FROM 
+    books b
+JOIN 
+    Books_Authors ba ON b.isbn13 = ba.isbn13
+JOIN 
+    Author a ON ba.Author_id = a.Author_id
+WHERE
+    title = $1 
+GROUP BY 
+    b.isbn13, b.title, b.original_title, b.publication_year, 
+    b.rating_avg, b.rating_count, b.rating_1_star, b.rating_2_star,
+    b.rating_3_star, b.rating_4_star, b.rating_5_star, b.image_url, b.image_small_url
+;` 
+
     const values = [request.params.name];
 
     pool.query(theQuery, values)
         .then((result) => {
             if (result.rowCount >= 1) {
                 response.send({
-                    entry: result.rows,
+                    entry: toBook(result.rows[0]),
                 });
             } else {
                 response.status(404).send({
