@@ -56,7 +56,7 @@ signinRouter.post(
             next();
         } else {
             response.status(400).send({
-                message: 'Missing username - please refer to documentation.',
+                message: 'Missing username - please refer to documentation',
             });
         }
     },
@@ -65,7 +65,7 @@ signinRouter.post(
             next();
         } else {
             response.status(400).send({
-                message: 'Missing password - please refer to documentation.',
+                message: 'Missing password - please refer to documentation',
             });
         }
     },
