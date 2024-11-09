@@ -893,11 +893,11 @@ messageRouter.get('/offset', async (request: Request, response: Response) => {
     // NOTE: +request.query.limit the + tells TS to treat this string as a number
     const limit: number =
         isNumberProvided(request.query.limit) && +request.query.limit > 0
-            ? +request.query.limit
+            ? +request.body.limit
             : 16;
     const offset: number =
         isNumberProvided(request.query.offset) && +request.query.offset >= 0
-            ? +request.query.offset
+            ? +request.body.offset
             : 0;
 
     const values = [limit, offset];
