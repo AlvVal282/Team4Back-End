@@ -56,7 +56,7 @@ function toBook(row): IBook {
         ratings: sanitizedRatings,
         icons: sanitizedUrls
     };
-}
+};
 
 const verifyElement = (isValid, name, response) => {
     if (!isValid) {
@@ -66,8 +66,7 @@ const verifyElement = (isValid, name, response) => {
                 'Invalid or missing ' + name + ' - please refer to documentation',
         });
     }
-}
-
+};
 
 
 /**
@@ -127,22 +126,23 @@ const verifyElement = (isValid, name, response) => {
  */
 booksRouter.post(
     '/',
-    (request: Request, response: Response, next: NextFunction) => {
-        const isbn: number = request.body.entry.isbn13 as number;
-        if (validationFunctions.isNumberProvided(isbn) && isbn >= 0) {
-            next();
-        } else {
-            console.error('Invalid or missing ISBN');
-            response.status(400).send({
-                message:
-                    'Invalid or missing ISBN - please refer to documentation',
-            });
-        }
-    },
+    //(request: Request, response: Response, next: NextFunction) => {
+    //    const isbn: number = request.body.entry.isbn13 as number;
+    //    if (validationFunctions.isNumberProvided(isbn) && isbn >= 0) {
+    //        next();
+    //    } else {
+    //        console.error('Invalid or missing ISBN');
+    //        response.status(400).send({
+    //            message:
+    //                'Invalid or missing ISBN - please refer to documentation',
+    //        });
+    //    }
+    //},
     (request: Request, response: Response, next: NextFunction) => {
         verifyElement(
-            validationFunctions.isStringProvided(request.body.entry.author),
-            "Authors",
+            validationFunctions.isNumberProvided(request.body.entry.isbn)
+                && request.body.entry.isbn >= 0,
+            "ISBN",
             response
         );
         verifyElement(
@@ -150,6 +150,44 @@ booksRouter.post(
             "Authors",
             response
         );
+        verifyElement(
+            validationFunctions.isNumberProvided(request.body.entry.publication)
+                && request.body.entry.publication >= 0,
+            "Publication",
+            response
+        );
+        verifyElement(
+            validationFunctions.isStringProvided(request.body.entry.original_title),
+            "Original Title",
+            response
+        );
+        verifyElement(
+            validationFunctions.isStringProvided(request.body.entry.title),
+            "Title",
+            response
+        );
+        const ratings = request.body.entry.ratings;
+        verifyElement(
+            ratings != null
+                && ratings.average != null && ratings.average >= 1 && ratings.average <= 5
+                && ratings.count   != null && ratings.count   >= 0
+                && ratings.rating1 != null && ratings.rating1 >= 0
+                && ratings.rating2 != null && ratings.rating2 >= 0
+                && ratings.rating3 != null && ratings.rating3 >= 0
+                && ratings.rating4 != null && ratings.rating4 >= 0
+                && ratings.rating5 != null && ratings.rating5 >= 0,
+            "Rating",
+            response
+        );
+        const icons = request.body.icons;
+        verifyElement(
+            icons != null
+                && icons.large != null && validationFunctions.isStringProvided(icons.large)
+                && icons.small != null && validationFunctions.isStringProvided(icons.small),
+            "Title",
+            response
+        );
+        next();
     },
     (request: IJwtRequest, response: Response) => {
         const theQuery =
@@ -319,7 +357,7 @@ booksRouter.delete(
         pool.query(theQuery, values)
             .then((result) => {
                 if (result.rowCount == 1) {
-                    response.send( toBook(result.rows[-1]) );
+                    response.send( toBook(result.rows[0]) );
                 } else {
                     response.status(404).send({
                         message: 'isbn not found',
