@@ -149,14 +149,13 @@ registerRouter.post(
     },
     (request: IUserRequest, response: Response, next: NextFunction) => {
         const theQuery =
-            'INSERT INTO Account(firstname, lastname, username, email, phone, account_role) VALUES ($1, $2, $3, $4, $5, $6) RETURNING account_id';
+            'INSERT INTO Account(firstname, lastname, username, email, phone) VALUES ($1, $2, $3, $4, $5) RETURNING account_id';
         const values = [
             request.body.firstname,
             request.body.lastname,
             request.body.username,
             request.body.email,
             request.body.phone,
-            request.body.role,
         ];
         // console.dir({ ...request.body, password: '******' });
         pool.query(theQuery, values)
@@ -201,7 +200,7 @@ registerRouter.post(
             .then(() => {
                 const accessToken = jwt.sign(
                     {
-                        role: request.body.role,
+                        name: request.body.firstname,
                         id: request.id,
                     },
                     key.secret,
