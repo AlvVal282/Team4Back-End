@@ -278,7 +278,24 @@ booksRouter.post(
  * @apiError (400: ISBN not in range) {String} message "ISBN not in range - please refer to documentation"
  * @apiError (400: Empty query parameter) {String} message "No query parameter in url"
  */
-booksRouter.get('/isbns/:isbn', (request: IJwtRequest, response: Response) => {
+booksRouter.get(
+    '/isbns/:isbn',
+    (request: Request, response: Response, next: NextFunction) => {
+        if (request.params.isbn === null || request.params.isbn === undefined) {
+            response.status(400).send({
+                message: 'No query parameter in url - please refer to documentation',
+            });
+        } else if (!validationFunctions.isNumberProvided(request.params.isbn)) {
+            response.status(400).send({
+                message: 'Query parameter not of required type - please refer to documentation',
+            });
+        } else if (Number(request.params.isbn) > 0 || Number(request.params.isbn) > Math.pow(10, 13)) {
+            response.status(400).send({
+                message: 'ISBN not in range - please refer to documentation',
+            });
+        }
+    },
+    (request: IJwtRequest, response: Response) => {
     const theQuery = 'SELECT * FROM Books WHERE isbn13 = $1';
     const values = [request.params.isbn];
 
@@ -286,11 +303,11 @@ booksRouter.get('/isbns/:isbn', (request: IJwtRequest, response: Response) => {
         .then((result) => {
             if (result.rowCount == 1) {
                 response.send({
-                    entry: result.rows[0],
+                    result: toBook(result.rows[0]),
                 });
             } else {
                 response.status(404).send({
-                    message: 'isbn not found',
+                    message: 'No book with given ISBN',
                 });
             }
         })
@@ -357,7 +374,9 @@ booksRouter.delete(
         pool.query(theQuery, values)
             .then((result) => {
                 if (result.rowCount == 1) {
-                    response.send( toBook(result.rows[0]) );
+                response.send({
+                    result: toBook(result.rows[0]),
+                });
                 } else {
                     response.status(404).send({
                         message: 'isbn not found',
