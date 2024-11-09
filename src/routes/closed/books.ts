@@ -90,7 +90,7 @@ const verifyElement = (isValid, name, response) => {
  * @apiBody {string} entry.title The title of the book.
  * @apiBody {Object} entry.ratings An object representing all the information for
  * consumer and critic ratings for the given book.
- * @apiBody {number} entry.ratings.average The mean value of all 5-star ratings for
+ * @apiBody {number} entry.ratings.average The mean value of all ratings for
  * this book. Must be within the range of 0 to 5 inclusive.
  * @apiBody {number} entry.ratings.count The total number of ratings for this book. Must be
  * positive.
@@ -126,18 +126,6 @@ const verifyElement = (isValid, name, response) => {
  */
 booksRouter.post(
     '/',
-    //(request: Request, response: Response, next: NextFunction) => {
-    //    const isbn: number = request.body.entry.isbn13 as number;
-    //    if (validationFunctions.isNumberProvided(isbn) && isbn >= 0) {
-    //        next();
-    //    } else {
-    //        console.error('Invalid or missing ISBN');
-    //        response.status(400).send({
-    //            message:
-    //                'Invalid or missing ISBN - please refer to documentation',
-    //        });
-    //    }
-    //},
     (request: Request, response: Response, next: NextFunction) => {
         verifyElement(
             validationFunctions.isNumberProvided(request.body.entry.isbn13)
@@ -146,7 +134,7 @@ booksRouter.post(
             response
         );
         verifyElement(
-            validationFunctions.isStringProvided(request.body.entry.author),
+            validationFunctions.isStringProvided(request.body.entry.authors),
             "Authors",
             response
         );
@@ -195,6 +183,9 @@ booksRouter.post(
         next();
     },
     (request: IJwtRequest, response: Response) => {
+
+        const authors = request.body.entry.authors.split(", ");
+
         const theQuery =
             'INSERT INTO Books (isbn13, publication_year, original_title, title, rating_avg, rating_count, rating_1_star, rating_2_star, rating_3_star, rating_4_star, rating_5_star, image_url, image_small_url) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13) RETURNING *';
         const values = [
@@ -214,11 +205,43 @@ booksRouter.post(
         ];
 
         pool.query(theQuery, values)
-            .then((result) => {
-                response.status(201).send({
-                    message: "Book successfully added.",
-                });
-            })
+        .then((queryRes) => {
+            const isbn13 = queryRes.rows[0].isbn13;
+    
+            let ids = [];
+    
+            authors.forEach((author) => {
+                const theQuery = `
+                    INSERT INTO Author (author_name) 
+                    VALUES ($1)
+                    ON CONFLICT (author_name) DO UPDATE 
+                    SET author_name = EXCLUDED.author_name
+                    RETURNING author_id;`;
+                
+                pool.query(theQuery, [author])
+                    .then((queryRes) => {
+                        const id = queryRes.rows[0].author_id;
+                        ids.push(id); 
+                        const theQuery = `
+                            INSERT INTO books_authors (isbn13, author_id) 
+                            VALUES ($1, $2) 
+                            ON CONFLICT (isbn13, author_id) DO NOTHING;
+                            `;
+                        
+                        pool.query(theQuery, [isbn13, id])
+                            .catch((error) => {
+                                console.error('Error inserting into books_authors:', error);
+                            })
+                    })
+                    .catch((error) => {
+                        console.error('Error inserting author:', error);
+                    })
+            });
+    
+            response.status(201).send({
+                message: 'Book successfully added.'
+            });
+        })
             .catch((error) => {
                 if (
                     error.detail != undefined &&
@@ -263,7 +286,7 @@ booksRouter.post(
  * @apiSuccess {string} result.title The title of the book.
  * @apiSuccess {Object} result.ratings An object representing all the information for
  * consumer and critic ratings for the given book.
- * @apiSuccess {number} result.ratings.average The mean value of all 5-star ratings for
+ * @apiSuccess {number} result.ratings.average The mean value of all ratings for
  * this book.
  * @apiSuccess {number} result.ratings.count The total number of ratings for this book.
  * @apiSuccess {number} result.ratings.rating1 The total number of 1-star ratings for this book.
@@ -379,7 +402,7 @@ GROUP BY
  * @apiSuccess {string} result.title The title of the book.
  * @apiSuccess {Object} result.ratings An object representing all the information for
  * consumer and critic ratings for the given book.
- * @apiSuccess {number} result.ratings.average The mean value of all 5-star ratings for
+ * @apiSuccess {number} result.ratings.average The mean value of all ratings for
  * this book.
  * @apiSuccess {number} result.ratings.count The total number of ratings for this book.
  * @apiSuccess {number} result.ratings.rating1 The total number of 1-star ratings for this book.
@@ -438,9 +461,9 @@ DELETE FROM Books WHERE isbn13 = $1 RETURNING *, (SELECT authors FROM delete_boo
         pool.query(theQuery, values)
             .then((result) => {
                 if (result.rowCount == 1) {
-                response.send({
-                    result: toBook(result.rows[0]),
-                });
+                    response.send({
+                        result: toBook(result.rows[0]),
+                    });
                 } else {
                     response.status(404).send({
                         message: 'isbn not found',
@@ -469,7 +492,7 @@ DELETE FROM Books WHERE isbn13 = $1 RETURNING *, (SELECT authors FROM delete_boo
  * Note that the min - or lower-bound - must be less than or equal to the max - upper-bound.
  *
  * @apiBody {number} min The lower-bound of all average ratings for each book
- * this route returns.
+ * this route returns. The value should be between 1 and 5 inclusive.
  * @apiBody {number} max The upper-bound of all average ratings for each book
  * this route returns.
  * @apiBody {string} order The ordering of the returned books. The only two allowed
@@ -488,7 +511,7 @@ DELETE FROM Books WHERE isbn13 = $1 RETURNING *, (SELECT authors FROM delete_boo
  * @apiSuccess {string} results.title The title of the book.
  * @apiSuccess {Object} results.ratings An object representing all the information for
  * consumer and critic ratings for the given book.
- * @apiSuccess {number} results.ratings.average The mean value of all 5-star ratings for
+ * @apiSuccess {number} results.ratings.average The mean value of all ratings for
  * this book.
  * @apiSuccess {number} results.ratings.count The total number of ratings for this book.
  * @apiSuccess {number} results.ratings.rating1 The total number of 1-star ratings for this book.
@@ -600,8 +623,8 @@ GROUP BY
  *
  * @apiBody {Object} ratings An object representing all the information for
  * consumer and critic ratings for the given book.
- * @apiBody {float} ratings.average The mean value of all 5 star ratings for this
- * book. The value should be between 0 and 5 inclusive.
+ * @apiBody {number} ratings.average The mean value of all ratings for this
+ * book. The value should be between 1 and 5 inclusive.
  * @apiBody {number} ratings.count The total number of ratings for this book. Must be
  * positive.
  * @apiBody{number} ratings.rating1 The total number of 1-star ratings for this book.
@@ -627,7 +650,7 @@ GROUP BY
  * @apiSuccess {string} result.title The title of the book.
  * @apiSuccess {Object} result.ratings An object representing all the information for
  * consumer and critic ratings for the given book.
- * @apiSuccess {float} result.ratings.average The mean value of all 5-star ratings for
+ * @apiSuccess {float} result.ratings.average The mean value of all ratings for
  * this book.
  * @apiSuccess {number} result.ratings.count The total number of ratings for this book.
  * @apiSuccess {number} result.ratings.rating1 The total number of 1-star ratings for this book.
@@ -645,21 +668,15 @@ GROUP BY
  * @apiError (404: No book with given ISBN) {String} message "No book with given ISBN"
  * @apiError (400: Query parameter wrong type) {String} message "Query parameter not of required type - please refer to documentation"
  * @apiError (400: Empty query parameter) {String} message "No query parameter in url"
- * @apiError (400: Invalid rating average) {String} message "Rating average is not in range of 0 to 5 inclusive - please refer to documentation"
+ * @apiError (400: Invalid rating average) {String} message "Rating average is not in range of 1 to 5 inclusive - please refer to documentation"
  * @apiError (400: Invalid rating count) {String} message "Rating count must be positive - please refer to documentation"
  */
-booksRouter.put('/rating/:isbn', 
+booksRouter.put(
+    '/rating/:isbn', 
     (request: IJwtRequest, response: Response, next: NextFunction) => {
-        const ratings = request.body.ratings;
         const rating_avg: number = request.body.ratings.average as number;
         const rating_count: number = request.body.ratings.count as number;
-        const rating_1_star: number = request.body.ratings.rating1 as number;
-        const rating_2_star: number = request.body.ratings.rating2 as number;
-        const rating_3_star: number = request.body.ratings.rating3 as number;
-        const rating_4_star: number = request.body.ratings.rating4 as number;
-        const rating_5_star: number = request.body.ratings.rating5 as number;
-        
-        if (validationFunctions.isNumberProvided(rating_avg) && rating_count >= 0) {
+        if (validationFunctions.isNumberProvided(rating_avg) && rating_count >= 1) {
             next();
         } else {
             console.error('Invalid or missing range');
@@ -739,7 +756,7 @@ booksRouter.put('/rating/:isbn',
  * @apiSuccess {string} results.title The title of the book.
  * @apiSuccess {Object} results.ratings An object representing all the information for
  * consumer and critic ratings for the given book.
- * @apiSuccess {number} results.ratings.average The mean value of all 5-star ratings for
+ * @apiSuccess {number} results.ratings.average The mean value of all ratings for
  * this book.
  * @apiSuccess {number} results.ratings.count The total number of ratings for this book.
  * @apiSuccess {number} results.ratings.rating1 The total number of 1-star ratings for this book.
@@ -832,7 +849,7 @@ GROUP BY
  * @apiSuccess {string} results.title The title of the book.
  * @apiSuccess {Object} results.ratings An object representing all the information for
  * consumer and critic ratings for the given book.
- * @apiSuccess {number} results.ratings.average The mean value of all 5-star ratings for
+ * @apiSuccess {number} results.ratings.average The mean value of all ratings for
  * this book.
  * @apiSuccess {number} results.ratings.count The total number of ratings for this book.
  * @apiSuccess {number} results.ratings.rating1 The total number of 1-star ratings for this book.
@@ -932,7 +949,7 @@ DELETE FROM Books WHERE title = $1 RETURNING *, (SELECT authors FROM delete_book
  * @apiSuccess {string} results.title The title of the book.
  * @apiSuccess {Object} results.ratings An object representing all the information for
  * consumer and critic ratings for the given book.
- * @apiSuccess {number} results.ratings.average The mean value of all 5-star ratings for
+ * @apiSuccess {number} results.ratings.average The mean value of all ratings for
  * this book.
  * @apiSuccess {number} results.ratings.count The total number of ratings for this book.
  * @apiSuccess {number} results.ratings.rating1 The total number of 1-star ratings for this book.
@@ -950,37 +967,39 @@ DELETE FROM Books WHERE title = $1 RETURNING *, (SELECT authors FROM delete_book
  * @apiError (404: No book with given title) {String} message "No book with given author"
  * @apiError (400: Empty query parameter) {String} message "No query parameter in url"
  */
-booksRouter.get('/author/:name', (request: IJwtRequest, response: Response) => {
-    const theQuery = `
-        SELECT b.isbn13, b.title, b.original_title, b.publication_year, 
-               b.rating_avg, b.rating_count, b.image_url 
-        FROM Books b 
-        JOIN Books_Authors ba ON b.isbn13 = ba.isbn13 
-        JOIN Author a ON ba.Author_ID = a.Author_ID 
-        WHERE a.Author_Name = $1;
-    `;
-    const values = [request.params.name];
+booksRouter.get(
+    '/author/:name', 
+    (request: IJwtRequest, response: Response) => {
+        const theQuery = `
+            SELECT b.isbn13, b.title, b.original_title, b.publication_year, 
+                b.rating_avg, b.rating_count, b.image_url 
+            FROM Books b 
+            JOIN Books_Authors ba ON b.isbn13 = ba.isbn13 
+            JOIN Author a ON ba.Author_ID = a.Author_ID 
+            WHERE a.Author_Name = $1;
+        `;
+        const values = [request.params.name];
 
-    pool.query(theQuery, values)
-        .then((result) => {
-            if (result.rowCount >= 1) {
-                response.send({
-                    entry: result.rows,
+        pool.query(theQuery, values)
+            .then((result) => {
+                if (result.rowCount >= 1) {
+                    response.send({
+                        entry: result.rows,
+                    });
+                } else {
+                    response.status(404).send({
+                        message: 'Author not found',
+                    });
+                }
+            })
+            .catch((error) => {
+                //log the error
+                console.error('DB Query error on GET /author/:name');
+                console.error(error);
+                response.status(500).send({
+                    message: 'server error - contact support',
                 });
-            } else {
-                response.status(404).send({
-                    message: 'Author not found',
-                });
-            }
-        })
-        .catch((error) => {
-            //log the error
-            console.error('DB Query error on GET /author/:name');
-            console.error(error);
-            response.status(500).send({
-                message: 'server error - contact support',
             });
-        });
 });
 
 /**
@@ -1005,7 +1024,7 @@ booksRouter.get('/author/:name', (request: IJwtRequest, response: Response) => {
  * @apiSuccess {string} results.title The title of the book.
  * @apiSuccess {Object} results.ratings An object representing all the information for
  * consumer and critic ratings for the given book.
- * @apiSuccess {number} results.ratings.average The mean value of all 5-star ratings for
+ * @apiSuccess {number} results.ratings.average The mean value of all ratings for
  * this book.
  * @apiSuccess {number} results.ratings.count The total number of ratings for this book.
  * @apiSuccess {number} results.ratings.rating1 The total number of 1-star ratings for this book.
@@ -1081,5 +1100,113 @@ DELETE FROM Books WHERE isbn13 IN (SELECT isbn13 FROM delete_book) RETURNING *, 
             });
     }
 );
+
+/**
+ * @api {get} /books/pagination/offset Request to retrieve entries by offset pagination
+ * @apiName OffsetPagination
+ * @apiGroup Books
+ * @apiDescription Request to retrieve the entries paginated using an entry limit and offset.
+ *
+ * @apiBody {number} limit the number of entry objects to return. Note, if a value less than
+ * 0 is provided or a non-numeric value is provided or no value is provided, the default limit
+ * amount of 16 will be used.
+ *
+ * @apiBody {number} offset the number to offset the lookup of entry objects to return. Note,
+ * if a value less than 0 is provided or a non-numeric value is provided or no value is provided,
+ * the default offset of 0 will be used.
+ *
+ * @apiSuccess {Object[]} results An aggregate of all books that match the query.
+ * @apiSuccess {number} results.isbn13 The ISBN number for the book.
+ * @apiSuccess {string} results.authors A comma-separated string of authors who have
+ * contributed to the book.
+ * @apiSuccess {number} results.publication The initial publication date of this book.
+ * @apiSuccess {string} results.original_title The title of the series this book was
+ * printed in. If not in a series, it is a copy of the title attribute. Note that you
+ * cannot consisently rely upon <code>original_title</code> to be applied applicably to
+ * serial publications.
+ * @apiSuccess {string} results.title The title of the book.
+ * @apiSuccess {Object} results.ratings An object representing all the information for
+ * consumer and critic ratings for the given book.
+ * @apiSuccess {number} results.ratings.average The mean value of all 5-star ratings for
+ * this book.
+ * @apiSuccess {number} results.ratings.count The total number of ratings for this book.
+ * @apiSuccess {number} results.ratings.rating_1 The total number of 1-star ratings for this book.
+ * @apiSuccess {number} results.ratings.rating_2 The total number of 2-star ratings for this book.
+ * @apiSuccess {number} results.ratings.rating_3 The total number of 3-star ratings for this book.
+ * @apiSuccess {number} results.ratings.rating_4 The total number of 4-star ratings for this book.
+ * @apiSuccess {number} results.ratings.rating_5 The total number of 5-star ratings for this book.
+ * @apiSuccess {Object} results.icons An object holding the urls for the images of this book.
+ * @apiSuccess {string} results.icons.large The url whose destination matches an
+ * image for this book. On average, image sizes fall within about <code>98x147</code>
+ * in pixels.
+ * @apiSuccess {string} results.icons.small The url whose destination matches the
+ * image for this book. On average, image sizes fall within about <code>50x75</code>
+ *
+ * @apiSuccess {Object} pagination metadata results from this paginated query
+ * @apiSuccess {number} pagination.totalRecords the most recent count on the total amount of entries. May be stale.
+ * @apiSuccess {number} pagination.limit the number of entry objects to returned.
+ * @apiSuccess {number} pagination.offset the number used to offset the lookup of entry objects.
+ * @apiSuccess {number} pagination.nextPage the offset that should be used on a preceding call to this route.
+ */
+booksRouter.get('/pagination/offset', async (request: Request, response: Response) => {
+    const theQuery = `
+    SELECT 
+        b.isbn13, b.title,b.original_title, b.publication_year, b.rating_avg, b.rating_count,               
+    b.rating_1_star, b.rating_2_star, b.rating_3_star, b.rating_4_star, b.rating_5_star,              
+    b.image_url, b.image_small_url,               
+    string_agg(a.author_name, ', ' ORDER BY a.author_name) AS authors
+FROM 
+    Books b
+JOIN 
+    Books_Authors ba ON b.isbn13 = ba.isbn13
+JOIN 
+    Author a ON ba.author_id = a.author_id
+GROUP BY 
+    b.isbn13, b.title, b.original_title, b.publication_year, 
+    b.rating_avg, b.rating_count, b.rating_1_star, b.rating_2_star,
+    b.rating_3_star, b.rating_4_star, b.rating_5_star, b.image_url, b.image_small_url
+LIMIT $1
+OFFSET $2;`;
+    /*
+     * NOTE: Using OFFSET in the query can lead to poor performance on large datasets as
+     * the DBMS has to scan all of the results up to the offset to "get" to it.
+     * The performance hit is roughly linear [O(n)] in performance. So, if the offset is
+     * close to the end of the data set and the dataset has 1000 entries and this query takes
+     * 1ms, a dataset with 100,000 entries will take 100ms and 1,000,000 will take 1,000ms or 1s!
+     * The times used above are solely used as examples.
+     */
+
+    // NOTE: +request.body.limit the + tells TS to treat this string as a number
+    const limit: number =
+        validationFunctions.isNumberProvided(request.body.limit) && +request.body.limit > 0
+            ? +request.body.limit
+            : 16;
+    const offset: number =
+        validationFunctions.isNumberProvided(request.body.offset) && +request.body.offset >= 0
+            ? +request.body.offset
+            : 0;
+
+    const values = [limit, offset];
+
+    // demonstrating deconstructing the returned object. const { rows }
+    const { rows } = await pool.query(theQuery, values);
+
+    // This query is SLOW on large datasets! - Beware!
+    const result = await pool.query(
+        'SELECT count(*) AS exact_count FROM Books;'
+    );
+    const count = result.rows[0].exact_count;
+    
+    response.send({
+        results: rows.map((b) => toBook(b)),
+        pagination: {
+            totalRecords: count,
+            limit,
+            offset,
+            nextPage: limit + offset,
+        },
+    });
+});
+
 
 export { booksRouter };

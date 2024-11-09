@@ -171,7 +171,9 @@ changePasswordRouter.put(
         pool.query(theQuery, values)
             .then(() => {
                 //We successfully changed the password!
-                response.status(200).send("Successfully changed password for " + request.body.username + "!");
+                response.status(200).send({
+                    message: 'Successfully changed password for ' + request.body.username + '!'
+                });
             })
             .catch((error) => {
                 // If this error were to occur, there would not exist an account credential
