@@ -60,7 +60,7 @@ function toBook(row): IBook {
 
 const verifyElement = (isValid, name, response) => {
     if (!isValid) {
-        console.error('Invalid or ' + name);
+        console.error('Invalid or missing ' + name);
         response.status(400).send({
             message:
                 'Invalid or missing ' + name + ' - please refer to documentation',
@@ -140,8 +140,8 @@ booksRouter.post(
     //},
     (request: Request, response: Response, next: NextFunction) => {
         verifyElement(
-            validationFunctions.isNumberProvided(request.body.entry.isbn)
-                && request.body.entry.isbn >= 0,
+            validationFunctions.isNumberProvided(request.body.entry.isbn13)
+                && request.body.entry.isbn13 >= 0,
             "ISBN",
             response
         );
@@ -289,7 +289,7 @@ booksRouter.get(
             response.status(400).send({
                 message: 'Query parameter not of required type - please refer to documentation',
             });
-        } else if (Number(request.params.isbn) > 0 || Number(request.params.isbn) > Math.pow(10, 13)) {
+        } else if (Number(request.params.isbn) < 0 || Number(request.params.isbn) > Math.pow(10, 13)) {
             response.status(400).send({
                 message: 'ISBN not in range - please refer to documentation',
             });
