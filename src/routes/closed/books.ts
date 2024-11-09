@@ -93,19 +93,6 @@ booksRouter.post(
     '/',
     (request: IJwtRequest, response: Response, next: NextFunction) => {
         const isbn: number = request.body.entry.isbn13 as number;
-        const authors: string = request.body.entry.authors as string;
-        const publication: number = request.body.entry.publication as number;
-        const original_title: string = request.body.entry.original_title as string;
-        const title: string = request.body.entry.title as string;
-        const rating_avg: number = request.body.entry.ratings.average as number;
-        const rating_count: number = request.body.entry.ratings.count as number;
-        const rating_1_star: number = request.body.entry.ratings.rating1 as number;
-        const rating_2_star: number = request.body.entry.ratings.rating2 as number;
-        const rating_3_star: number = request.body.entry.ratings.rating3 as number;
-        const rating_4_star: number = request.body.entry.ratings.rating4 as number;
-        const rating_5_star: number = request.body.entry.ratings.rating5 as number;
-        const image_url: string = request.body.entry.icons.image_url as string;
-        const image_small_url: string = request.body.entry.icons
         if (validationFunctions.isNumberProvided(isbn) && isbn >= 0) {
             next();
         } else {
@@ -240,7 +227,9 @@ booksRouter.post(
  * @apiError (400: ISBN not in range) {String} message "ISBN not in range - please refer to documentation"
  * @apiError (400: Empty query parameter) {String} message "No query parameter in url"
  */
-booksRouter.get('/isbns/:isbn', (request: IJwtRequest, response: Response) => {
+booksRouter.get(
+    '/isbns/:isbn', 
+    (request: IJwtRequest, response: Response) => {
     const theQuery = 'SELECT * FROM Books WHERE isbn13 = $1';
     const values = [request.params.isbn];
 
@@ -501,17 +490,11 @@ booksRouter.get(
  * @apiError (400: Invalid rating average) {String} message "Rating average is not in range of 1 to 5 inclusive - please refer to documentation"
  * @apiError (400: Invalid rating count) {String} message "Rating count must be positive - please refer to documentation"
  */
-booksRouter.put('/rating/:isbn', 
+booksRouter.put(
+    '/rating/:isbn', 
     (request: IJwtRequest, response: Response, next: NextFunction) => {
-        const ratings = request.body.ratings;
         const rating_avg: number = request.body.ratings.average as number;
         const rating_count: number = request.body.ratings.count as number;
-        const rating_1_star: number = request.body.ratings.rating1 as number;
-        const rating_2_star: number = request.body.ratings.rating2 as number;
-        const rating_3_star: number = request.body.ratings.rating3 as number;
-        const rating_4_star: number = request.body.ratings.rating4 as number;
-        const rating_5_star: number = request.body.ratings.rating5 as number;
-        
         if (validationFunctions.isNumberProvided(rating_avg) && rating_count >= 1) {
             next();
         } else {
@@ -610,7 +593,9 @@ booksRouter.put('/rating/:isbn',
  * @apiError (404: No book with given title) {String} message "No book with given title"
  * @apiError (400: Empty query parameter) {String} message "No query parameter in url"
  */
-booksRouter.get('/title/:name', (request: IJwtRequest, response: Response) => {
+booksRouter.get(
+    '/title/:name', 
+    (request: IJwtRequest, response: Response) => {
     const theQuery = 'SELECT * FROM Books WHERE title = $1';
     const values = [request.params.name];
 
@@ -746,37 +731,39 @@ booksRouter.delete(
  * @apiError (404: No book with given title) {String} message "No book with given author"
  * @apiError (400: Empty query parameter) {String} message "No query parameter in url"
  */
-booksRouter.get('/author/:name', (request: IJwtRequest, response: Response) => {
-    const theQuery = `
-        SELECT b.isbn13, b.title, b.original_title, b.publication_year, 
-               b.rating_avg, b.rating_count, b.image_url 
-        FROM Books b 
-        JOIN Books_Authors ba ON b.isbn13 = ba.isbn13 
-        JOIN Author a ON ba.Author_ID = a.Author_ID 
-        WHERE a.Author_Name = $1;
-    `;
-    const values = [request.params.name];
+booksRouter.get(
+    '/author/:name', 
+    (request: IJwtRequest, response: Response) => {
+        const theQuery = `
+            SELECT b.isbn13, b.title, b.original_title, b.publication_year, 
+                b.rating_avg, b.rating_count, b.image_url 
+            FROM Books b 
+            JOIN Books_Authors ba ON b.isbn13 = ba.isbn13 
+            JOIN Author a ON ba.Author_ID = a.Author_ID 
+            WHERE a.Author_Name = $1;
+        `;
+        const values = [request.params.name];
 
-    pool.query(theQuery, values)
-        .then((result) => {
-            if (result.rowCount >= 1) {
-                response.send({
-                    entry: result.rows,
+        pool.query(theQuery, values)
+            .then((result) => {
+                if (result.rowCount >= 1) {
+                    response.send({
+                        entry: result.rows,
+                    });
+                } else {
+                    response.status(404).send({
+                        message: 'Author not found',
+                    });
+                }
+            })
+            .catch((error) => {
+                //log the error
+                console.error('DB Query error on GET /author/:name');
+                console.error(error);
+                response.status(500).send({
+                    message: 'server error - contact support',
                 });
-            } else {
-                response.status(404).send({
-                    message: 'Author not found',
-                });
-            }
-        })
-        .catch((error) => {
-            //log the error
-            console.error('DB Query error on GET /author/:name');
-            console.error(error);
-            response.status(500).send({
-                message: 'server error - contact support',
             });
-        });
 });
 
 /**
