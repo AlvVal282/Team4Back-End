@@ -1018,7 +1018,7 @@ booksRouter.delete(
  * @apiSuccess {number} pagination.offset the number used to offset the lookup of entry objects.
  * @apiSuccess {number} pagination.nextPage the offset that should be used on a preceding call to this route.
  */
-messageRouter.get('/offset', async (request: Request, response: Response) => {
+booksRouter.get('/offset', async (request: Request, response: Response) => {
     const theQuery = `
     SELECT 
         b.isbn, b.title,b.original_title, b.publication_year, b.rating_avg, b.rating_count,               
@@ -1048,11 +1048,11 @@ OFFSET $2;`;
 
     // NOTE: +request.query.limit the + tells TS to treat this string as a number
     const limit: number =
-        isNumberProvided(request.body.limit) && +request.body.limit > 0
+        validationFunctions.isNumberProvided(request.body.limit) && +request.body.limit > 0
             ? +request.body.limit
             : 16;
     const offset: number =
-        isNumberProvided(request.body.offset) && +request.body.offset >= 0
+        validationFunctions.isNumberProvided(request.body.offset) && +request.body.offset >= 0
             ? +request.body.offset
             : 0;
 
