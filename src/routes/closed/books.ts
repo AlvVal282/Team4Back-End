@@ -1017,18 +1017,18 @@ booksRouter.delete(
 booksRouter.get('/pagination/offset', async (request: Request, response: Response) => {
     const theQuery = `
     SELECT 
-        b.isbn, b.title,b.original_title, b.publication_year, b.rating_avg, b.rating_count,               
+        b.isbn13, b.title,b.original_title, b.publication_year, b.rating_avg, b.rating_count,               
     b.rating_1_star, b.rating_2_star, b.rating_3_star, b.rating_4_star, b.rating_5_star,              
     b.image_url, b.image_small_url,               
     string_agg(a.author_name, ', ' ORDER BY a.author_name) AS authors
 FROM 
     Books b
 JOIN 
-    Books_Authors ba ON b.isbn = ba.isbn
+    Books_Authors ba ON b.isbn13 = ba.isbn13
 JOIN 
     Author a ON ba.author_id = a.author_id
 GROUP BY 
-    b.isbn, b.title, b.original_title, b.publication_year, 
+    b.isbn13, b.title, b.original_title, b.publication_year, 
     b.rating_avg, b.rating_count, b.rating_1_star, b.rating_2_star,
     b.rating_3_star, b.rating_4_star, b.rating_5_star, b.image_url, b.image_small_url
 LIMIT $1
