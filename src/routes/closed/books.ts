@@ -810,8 +810,9 @@ GROUP BY
         .then((result) => {
             if (result.rowCount >= 1) {
                 response.send({
-                    entry: toBook(result.rows[0]),
+                    results: result.rows.map((b) => toBook(b))
                 });
+
             } else {
                 response.status(404).send({
                     message: 'Title not found',
