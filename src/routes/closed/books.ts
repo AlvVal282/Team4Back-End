@@ -907,7 +907,7 @@ DELETE FROM Books WHERE title = $1 RETURNING *, (SELECT authors FROM delete_book
             .then((result) => {
                 if (result.rowCount >= 1) {
                     response.send({
-                        entry: result.rows,
+                        results: result.rows.map((b) => toBook(b))
                     });
                 } else {
                     response.status(404).send({
@@ -984,7 +984,7 @@ booksRouter.get(
             .then((result) => {
                 if (result.rowCount >= 1) {
                     response.send({
-                        entry: result.rows,
+                        results: result.rows.map((b) => toBook(b))
                     });
                 } else {
                     response.status(404).send({
@@ -1082,7 +1082,7 @@ DELETE FROM Books WHERE isbn13 IN (SELECT isbn13 FROM delete_book) RETURNING *, 
             .then((result) => {
                 if (result.rowCount >= 1) {
                     response.send({
-                        entry: result.rows,
+                        results: result.rows.map((b) => toBook(b))
                     });
                 } else {
                     response.status(404).send({
