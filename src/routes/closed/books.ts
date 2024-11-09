@@ -49,7 +49,7 @@ function toBook(row): IBook {
     
     return {
         isbn13: Number(row.isbn13),
-        authors: "", // TODO
+        authors: row.authors,
         publication: row.publication_year,
         original_title: row.original_title,
         title: row.title,
@@ -302,7 +302,35 @@ booksRouter.get(
         next();
     },
     (request: IJwtRequest, response: Response) => {
-    const theQuery = 'SELECT * FROM Books WHERE isbn13 = $1';
+    const theQuery = `SELECT 
+    b.isbn13,
+    b.title,                         
+    b.original_title,                
+    b.publication_year,              
+    b.rating_avg,                    
+    b.rating_count,                  
+    b.rating_1_star,                 
+    b.rating_2_star,                 
+    b.rating_3_star,                 
+    b.rating_4_star,                 
+    b.rating_5_star,                 
+    b.image_url,                     
+    b.image_small_url,               
+    string_agg(a.Author_name, ', ' ORDER BY a.Author_name) AS authors
+FROM 
+    books b
+JOIN 
+    Books_Authors ba ON b.isbn13 = ba.isbn13
+JOIN 
+    Author a ON ba.Author_id = a.Author_id
+WHERE
+    b.isbn13 = $1
+GROUP BY 
+    b.isbn13, b.title, b.original_title, b.publication_year, 
+    b.rating_avg, b.rating_count, b.rating_1_star, b.rating_2_star,
+    b.rating_3_star, b.rating_4_star, b.rating_5_star, b.image_url, b.image_small_url;` 
+
+
     const values = [request.params.isbn];
 
     pool.query(theQuery, values)
