@@ -672,12 +672,29 @@ GROUP BY
  *
  * @apiError (404: No book with given ISBN) {String} message "No book with given ISBN"
  * @apiError (400: Query parameter wrong type) {String} message "Query parameter not of required type - please refer to documentation"
- * @apiError (400: Empty query parameter) {String} message "No query parameter in url"
+ * @apiError (400: Empty query parameter) {String} message "No query parameter in url - please refer to documentation"
+ * @apiError (400: ISBN not in range) {String} message "ISBN not in range - please refer to documentation"
  * @apiError (400: Invalid rating average) {String} message "Rating average is not in range of 1 to 5 inclusive - please refer to documentation"
  * @apiError (400: Invalid rating count) {String} message "Rating count must be positive - please refer to documentation"
  */
 booksRouter.put(
     '/rating/:isbn', 
+    (request: Request, response: Response, next: NextFunction) => {
+        if (request.params.isbn === null || request.params.isbn === undefined) {
+            response.status(400).send({
+                message: 'No query parameter in url - please refer to documentation',
+            });
+        } else if (!validationFunctions.isNumberProvided(request.params.isbn)) {
+            response.status(400).send({
+                message: 'Query parameter not of required type - please refer to documentation',
+            });
+        } else if (Number(request.params.isbn) < 0 || Number(request.params.isbn) > Math.pow(10, 13)) {
+            response.status(400).send({
+                message: 'ISBN not in range - please refer to documentation',
+            });
+        }
+        next();
+    },
     (request: IJwtRequest, response: Response, next: NextFunction) => {
         const rating_avg: number = request.body.ratings.average as number;
         const rating_count: number = request.body.ratings.count as number;
@@ -716,9 +733,15 @@ booksRouter.put(
 
         pool.query(theQuery, values)
             .then((result) => {
-                response.status(201).send({
-                    result: toBook( result.rows[0] ),
-                });
+                if (result.rowCount == 1) {
+                    response.status(201).send({
+                        result: toBook(result.rows[0]),
+                    });
+                } else {
+                    response.status(404).send({
+                        message: 'No book with given ISBN',
+                    });
+                }
             })
             .catch((error) => {
                 if (
