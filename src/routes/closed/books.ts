@@ -726,6 +726,7 @@ GROUP BY
  * @apiError (400: ISBN not in range) {String} message "ISBN not in range - please refer to documentation"
  * @apiError (400: Invalid rating average) {String} message "Rating average is not in range of 1 to 5 inclusive - please refer to documentation"
  * @apiError (400: Invalid rating count) {String} message "Rating count must be positive - please refer to documentation"
+ * @apiError (400: Missing body fields) {String} message "Missing fields within the body - please refer to documentation"
  */
 booksRouter.put(
     '/rating/:isbn', 
@@ -746,16 +747,44 @@ booksRouter.put(
         next();
     },
     (request: IJwtRequest, response: Response, next: NextFunction) => {
-        const rating_avg: number = request.body.ratings.average as number;
-        const rating_count: number = request.body.ratings.count as number;
-        if (validationFunctions.isNumberProvided(rating_avg) && rating_count >= 1) {
-            next();
-        } else {
-            console.error('Invalid or missing range');
+        const toCheck = [
+            request.body.ratings.average,
+            request.body.ratings.count,
+            request.body.ratings.rating1,
+            request.body.ratings.rating2,
+            request.body.ratings.rating3,
+            request.body.ratings.rating4,
+            request.body.ratings.rating5
+        ];
+
+        for (let i = 0; i < toCheck.length; i++) {
+            if (!validationFunctions.isNumberProvided(toCheck[i])) {
+                response.status(400).send({
+                    message:
+                        'Missing fields within the body - please refer to documentation',
+                });
+            } else {
+                toCheck[i] = toCheck[i] as number;
+            }
+        }
+
+        for (let i = 0; i < 6; i++) {
+            if (toCheck[i + 1] < 0) {
+                response.status(400).send({
+                    message:
+                        'Rating count must be positive - please refer to documenation',
+                });
+            }
+        }
+
+        const rating_avg: number = toCheck[0];
+        if (rating_avg > 5 || rating_avg < 1) {
             response.status(400).send({
                 message:
-                    'Invalid or missing range - please refer to documentation',
+                    'Rating average is not in range of 1 to 5 inclusive - please refer to documentation',
             });
+        } else {
+            next();
         }
     },
     (request: IJwtRequest, response: Response) => {
