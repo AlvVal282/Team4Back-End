@@ -309,7 +309,7 @@ booksRouter.post(
  * @apiError (404: No book with given ISBN) {String} message "No book with given ISBN"
  * @apiError (400: Query parameter wrong type) {String} message "Query parameter not of required type - please refer to documentation"
  * @apiError (400: ISBN not in range) {String} message "ISBN not in range - please refer to documentation"
- * @apiError (400: Empty query parameter) {String} message "No query parameter in url"
+ * @apiError (400: Empty query parameter) {String} message "No query parameter in url - please refer to documentation"
  */
 booksRouter.get(
     '/isbns/:isbn',
@@ -425,10 +425,26 @@ GROUP BY
  * @apiError (404: No book with given ISBN) {String} message "No book with given ISBN"
  * @apiError (400: Query parameter wrong type) {String} message "Query parameter not of required type - please refer to documentation"
  * @apiError (400: ISBN not in range) {String} message "ISBN not in range - please refer to documentation"
- * @apiError (400: Empty query parameter) {String} message "No query parameter in url"
+ * @apiError (400: Empty query parameter) {String} message "No query parameter in url - please refer to documentation"
  */
 booksRouter.delete(
     '/isbns/:isbn',
+    (request: Request, response: Response, next: NextFunction) => {
+        if (request.params.isbn === null || request.params.isbn === undefined) {
+            response.status(400).send({
+                message: 'No query parameter in url - please refer to documentation',
+            });
+        } else if (!validationFunctions.isNumberProvided(request.params.isbn)) {
+            response.status(400).send({
+                message: 'Query parameter not of required type - please refer to documentation',
+            });
+        } else if (Number(request.params.isbn) < 0 || Number(request.params.isbn) > Math.pow(10, 13)) {
+            response.status(400).send({
+                message: 'ISBN not in range - please refer to documentation',
+            });
+        }
+        next();
+    },
     (request: IJwtRequest, response: Response) => {
     const theQuery = `WITH delete_book AS (
     SELECT
@@ -471,7 +487,7 @@ DELETE FROM Books WHERE isbn13 = $1 RETURNING *, (SELECT authors FROM delete_boo
                     });
                 } else {
                     response.status(404).send({
-                        message: 'isbn not found',
+                        message: 'No book with given ISBN',
                     });
                 }
             })
@@ -533,23 +549,57 @@ DELETE FROM Books WHERE isbn13 = $1 RETURNING *, (SELECT authors FROM delete_boo
  *
  * @apiError (404: No books with given average rating interval) {String} message "No books fall within the interval requested"
  * @apiError (400: Lower-bound greater than upper-bound) {String} message "The lower bound for the interval is greater than the upper bound - please refer to documentation"
- * @apiError (400: Missing lower-bound) {String} message "Missing lower-bound parameter - please refer to documentation"
- * @apiError (400: Missing upper-bound) {String} message "Missing upper-bound parameter - please refer to documentation"
+ * @apiError (400: Missing lower-bound) {String} message "Missing or invalid lower-bound parameter - please refer to documentation"
+ * @apiError (400: Missing upper-bound) {String} message "Missing or invalid upper-bound parameter - please refer to documentation"
  * @apiError (400: Missing ordering field in body) {String} message "Missing ordering field in http body - please refer to documentation"
+ * @apiError (400: Ordering field not in required form) {String} message "Ordering field must be one of set options - please refer to documentation"
  */
 booksRouter.get(
     '/rating',
     (request: IJwtRequest, response: Response, next: NextFunction) => {
-        const min: number = request.body.min as number;
-        const max: number = request.body.max as number;
-        const order: string = request.body.order as string;
-        if (validationFunctions.isNumberProvided(min) && min > 0 && max > min) {
-            next();
+        if (validationFunctions.isNumberProvided(request.body.min)
+            && validationFunctions.isNumberProvided(request.body.min)
+            && validationFunctions.isStringProvided(request.body.order)) {
+            const min: number = request.body.min as number;
+            const max: number = request.body.max as number;
+            const order: string = request.body.order as string;
+            if (min <= 0) {
+                console.error('Invalid or missing range');
+                response.status(400).send({
+                    message:
+                        'Missing or invalid lower-bound parameter - please refer to documentation',
+                });
+            } else if (max < min) {
+                console.error('Invalid or missing range');
+                response.status(400).send({
+                    message:
+                        'The lower bound for the interal is greater than the upper bound - please refer to documentation',
+                });
+            } else if (order != 'min-first' && order != 'max-first') {
+                response.status(400).send({
+                    message:
+                        'Ordering field must be one of set options - please refer to documentation',
+                });
+            } else {
+                next();
+            }
+        } else if (!validationFunctions.isNumberProvided(request.body.min)) {
+            console.error('Invalid or missing range');
+            response.status(400).send({
+                message:
+                    'Missing or invalid lower-bound parameter - please refer to documentation',
+            });
+        } else if (!validationFunctions.isNumberProvided(request.body.max)){
+            console.error('Invalid or missing range');
+            response.status(400).send({
+                message:
+                    'Missing or invalid upper-bound parameter - please refer to documentation',
+            });
         } else {
             console.error('Invalid or missing range');
             response.status(400).send({
                 message:
-                    'Invalid or missing range - please refer to documentation',
+                    'Missing ordering field in http body - please refer to documentation',
             });
         }
     },
@@ -802,7 +852,18 @@ booksRouter.put(
  * @apiError (404: No book with given title) {String} message "No book with given title"
  * @apiError (400: Empty query parameter) {String} message "No query parameter in url"
  */
-booksRouter.get('/title/:name', (request: IJwtRequest, response: Response) => {
+booksRouter.get(
+    '/title/:name',
+    (request: Request, response: Response, next: NextFunction) => {
+        if (!validationFunctions.isStringProvided(request.params.name)) {
+            response.status(400).send({
+                message: 'No query parameter in url',
+            });
+        } else {
+            next();
+        }
+    },
+    (request: IJwtRequest, response: Response) => {
     const theQuery = `SELECT 
     b.isbn13,
     b.title,                         
@@ -843,7 +904,7 @@ GROUP BY
 
             } else {
                 response.status(404).send({
-                    message: 'Title not found',
+                    message: 'No book with given title',
                 });
             }
         })
@@ -898,6 +959,15 @@ GROUP BY
  */
 booksRouter.delete(
     '/title/:name',
+    (request: Request, response: Response, next: NextFunction) => {
+        if (!validationFunctions.isStringProvided(request.params.name)) {
+            response.status(400).send({
+                message: 'No query parameter in url',
+            });
+        } else {
+            next();
+        }
+    },
     (request: IJwtRequest, response: Response) => {
     const theQuery = `WITH delete_book AS (
     SELECT
@@ -998,6 +1068,15 @@ DELETE FROM Books WHERE title = $1 RETURNING *, (SELECT authors FROM delete_book
  */
 booksRouter.get(
     '/author/:name', 
+    (request: Request, response: Response, next: NextFunction) => {
+        if (!validationFunctions.isStringProvided(request.params.name)) {
+            response.status(400).send({
+                message: 'No query parameter in url',
+            });
+        } else {
+            next();
+        }
+    },
     (request: IJwtRequest, response: Response) => {
         const theQuery = `SELECT 
     b.isbn13,
@@ -1093,6 +1172,15 @@ GROUP BY
  */
 booksRouter.delete(
     '/author/:name',
+    (request: Request, response: Response, next: NextFunction) => {
+        if (!validationFunctions.isStringProvided(request.params.name)) {
+            response.status(400).send({
+                message: 'No query parameter in url',
+            });
+        } else {
+            next();
+        }
+    },
     (request: IJwtRequest, response: Response) => {
     const theQuery = `WITH delete_book AS (
     SELECT
