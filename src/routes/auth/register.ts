@@ -81,7 +81,7 @@ const emailMiddlewareCheck = (
  * of letters, numbers, and/or special characters in the set of: <code>!, @, #, $, %, ^, &, *, _</code>. Passwords are stored in a case-sensitive manner.
  *
  * <strong>Phone Rules</strong>: When passing a phone number string, it must follow the format: <code>###-###-####</code> where <code>#</code>
- * is any number between <code>0-9</code>.
+ * is any number between <code>0-9</code>. Must be unique.
  *
  * @apiBody {string} firstname The registering user's first name. May contain any string of letters and apostrophes of length greater than one. Case-sensitive.
  * @apiBody {string} lastname The registering user's last name. May contain any string of letters and apostrophes of length greater than one. Case-sensitive.
@@ -90,18 +90,20 @@ const emailMiddlewareCheck = (
  * @apiBody {string} password The registering user's password. For a detailed description of formatting rules please read the API description.
  * @apiBody {string} username A unique username for the registering user. May contain any string of uppercase/lowercase letters and numbers, as
  * well as underscores and periods. Length must be greater than one. Case-sensitive.
- * @apiBody {string} phone A phone number for this user. For detailed formatting details please read API description.
+ * @apiBody {string} phone A phone number for this user. For detailed formatting details please read API description. Must be unique.
  *
  * @apiSuccess (Success 201) {string} accessToken A newly created JWT.
+ * @apiSuccess (Success 201) {string} id The account id for the user's registered account.
  *
  * @apiError (400: Missing First Name) {String} message <code>"Invalid or missing first name - please refer to documentation"</code>
- * @apiError (400: Missing Last Name) {String} message <code>"Invalid or missing last name- please refer to documentation"</code>
+ * @apiError (400: Missing Last Name) {String} message <code>"Invalid or missing last name - please refer to documentation"</code>
  * @apiError (400: Missing Username) {String} message <code>"Invalid or missing username - please refer to documentation"</code>
  * @apiError (400: Invalid Password) {String} message <code>"Invalid or missing password - please refer to documentation"</code>
  * @apiError (400: Invalid Phone) {String} message <code>"Invalid or missing phone number - please refer to documentation"</code>
  * @apiError (400: Invalid Email) {String} message <code>"Invalid or missing email - please refer to documentation"</code>
  * @apiError (400: Username exists) {String} message <code>"Username exists"</code>
  * @apiError (400: Email exists) {String} message <code>"Email exists"</code>
+ * @apiError (400: Phone number exists) {String} message <code>"Phone number exists"</code>
  *
  */
 registerRouter.post(
@@ -183,6 +185,10 @@ registerRouter.post(
                     response.status(400).send({
                         message: 'Email exists',
                     });
+                } else if (error.constraint == 'account_phone_key') {
+                    response.status(400).send({
+                        message: 'Phone number exists'
+                    });
                 } else {
                     //log the error
                     console.error('DB Query error on register');
@@ -218,7 +224,8 @@ registerRouter.post(
                 console.dir({ ...request.body, password: '******' });
                 //We successfully added the user!
                 response.status(201).send({
-                    accessToken
+                    accessToken,
+                    id: request.id
                 });
             })
             .catch((error) => {
