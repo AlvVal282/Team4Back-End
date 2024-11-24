@@ -41,6 +41,7 @@ const key = {
  * @apiSuccess {Object} user A user object.
  * @apiSuccess {string} user.email The email address for the user associated with <code>username</code>.
  * @apiSuccess {string} user.firstname The first name for the user associated with <code>username</code>.
+ * @apiSuccess {string} user.id The id for the user associated with <code>username</code>.
  *
  * @apiError (400: Missing Username) {String} message <code>"Missing username - please refer to documentation"</code>
  * @apiError (400: Invalid Password) {String} message <code>"Invalid or missing password - please refer to documentation"</code>
@@ -129,6 +130,7 @@ signinRouter.post(
                         user: {
                             email: result.rows[0].email,
                             name: result.rows[0].firstname,
+                            id: result.rows[0].account_id,
                         },
                     });
                 } else {

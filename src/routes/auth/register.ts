@@ -90,7 +90,7 @@ const emailMiddlewareCheck = (
  * @apiBody {string} password The registering user's password. For a detailed description of formatting rules please read the API description.
  * @apiBody {string} username A unique username for the registering user. May contain any string of uppercase/lowercase letters and numbers, as
  * well as underscores and periods. Length must be greater than one. Case-sensitive.
- * @apiBody {string} phone A phone number for this user. For detailed formatting details please read API description. Must be unique.
+ * @apiBody {string} phone A unique phone number for this user. For detailed formatting details please read API description.
  *
  * @apiSuccess (Success 201) {string} accessToken A newly created JWT.
  * @apiSuccess (Success 201) {string} id The account id for the user's registered account.
