@@ -39,8 +39,10 @@ const key = {
  *
  * @apiSuccess {string} accessToken JSON Web Token
  * @apiSuccess {Object} user A user object.
+ * @apiSuccess {string} user.name The first name for the user associated with <code>username</code>.
  * @apiSuccess {string} user.email The email address for the user associated with <code>username</code>.
- * @apiSuccess {string} user.firstname The first name for the user associated with <code>username</code>.
+ * @apiSuccess {string} user.role The role for the user associated with <code>username</code>. Note that the backend always returns 1
+ * as our backend does not account for roles.
  * @apiSuccess {string} user.id The id for the user associated with <code>username</code>.
  *
  * @apiError (400: Missing Username) {String} message <code>"Missing username - please refer to documentation"</code>

@@ -92,8 +92,13 @@ const emailMiddlewareCheck = (
  * well as underscores and periods. Length must be greater than one. Case-sensitive.
  * @apiBody {string} phone A unique phone number for this user. For detailed formatting details please read API description.
  *
- * @apiSuccess (Success 201) {string} accessToken A newly created JWT.
- * @apiSuccess (Success 201) {string} id The account id for the user's registered account.
+ * @apiSuccess {string} accessToken JSON Web Token
+ * @apiSuccess {Object} user A user object.
+ * @apiSuccess {string} user.name The first name for the user associated with <code>username</code>.
+ * @apiSuccess {string} user.email The email address for the user associated with <code>username</code>.
+ * @apiSuccess {string} user.role The role for the user associated with <code>username</code>. Note that the backend always returns 1
+ * as our backend does not account for roles.
+ * @apiSuccess {string} user.id The id for the user associated with <code>username</code>.
  *
  * @apiError (400: Missing First Name) {String} message <code>"Invalid or missing first name - please refer to documentation"</code>
  * @apiError (400: Missing Last Name) {String} message <code>"Invalid or missing last name - please refer to documentation"</code>
