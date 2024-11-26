@@ -225,7 +225,12 @@ registerRouter.post(
                 //We successfully added the user!
                 response.status(201).send({
                     accessToken,
-                    id: request.id
+                    user: {
+                        name: request.body.firstname,
+                        email: request.body.email,
+                        role: 1,
+                        id: request.id
+                    }
                 });
             })
             .catch((error) => {

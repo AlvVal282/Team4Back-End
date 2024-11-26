@@ -128,8 +128,9 @@ signinRouter.post(
                     response.status(200).json({
                         accessToken,
                         user: {
-                            email: result.rows[0].email,
                             name: result.rows[0].firstname,
+                            email: result.rows[0].email,
+                            role: 1,
                             id: result.rows[0].account_id,
                         },
                     });
