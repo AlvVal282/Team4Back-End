@@ -503,7 +503,7 @@ DELETE FROM Books WHERE isbn13 = $1 RETURNING *, (SELECT authors FROM delete_boo
 );
 
 /**
- * @api {get} /books/rating Request books by rating
+ * @api {POST} /books/rating Request books by rating
  * @apiName GetBookByRating
  * @apiGroup Books
  * @apiDescription Retrieve all books whose mean rating falls within the interval
@@ -554,7 +554,7 @@ DELETE FROM Books WHERE isbn13 = $1 RETURNING *, (SELECT authors FROM delete_boo
  * @apiError (400: Missing ordering field in body) {String} message "Missing ordering field in http body - please refer to documentation"
  * @apiError (400: Ordering field not in required form) {String} message "Ordering field must be one of set options - please refer to documentation"
  */
-booksRouter.get(
+booksRouter.post(
     '/rating',
     (request: IJwtRequest, response: Response, next: NextFunction) => {
         if (validationFunctions.isNumberProvided(request.body.min)
@@ -1268,7 +1268,7 @@ DELETE FROM Books WHERE isbn13 IN (SELECT isbn13 FROM delete_book) RETURNING *, 
 );
 
 /**
- * @api {get} /books/pagination/offset Request to retrieve entries by offset pagination
+ * @api {POST} /books/pagination/offset Request to retrieve entries by offset pagination
  * @apiName OffsetPagination
  * @apiGroup Books
  * @apiDescription Request to retrieve the entries paginated using an entry limit and offset.
@@ -1314,7 +1314,7 @@ DELETE FROM Books WHERE isbn13 IN (SELECT isbn13 FROM delete_book) RETURNING *, 
  * @apiSuccess {number} pagination.offset the number used to offset the lookup of entry objects.
  * @apiSuccess {number} pagination.nextPage the offset that should be used on a preceding call to this route.
  */
-booksRouter.get('/pagination/offset', async (request: Request, response: Response) => {
+booksRouter.post('/pagination/offset', async (request: Request, response: Response) => {
     const theQuery = `
     SELECT 
         b.isbn13, b.title,b.original_title, b.publication_year, b.rating_avg, b.rating_count,               
